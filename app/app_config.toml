@@ -24,7 +24,7 @@ location = "us-central1"
 # Provide the path to your JSON credential
 # This credential will be used to interact with Workspace
 # This is the path inside the docker image, example: /app/credential.json
-service_account_json_key = '/credentials/credentials.json'  # Change this path if you copied the file to a different path 
+service_account_json_key = '../credentials/credentials.json'  # Change this path if you copied the file to a different path 
 
 
 # -----------------------------------------------------------------------------
@@ -106,40 +106,77 @@ prompt_brand_overview = """Cymbal brand information:
 2. Vision: Elevate every step and statement with our curated ensemble of footwear and handbags.
 3. Mission: To seamlessly blend comfort and style, Cymbal aims to provide a harmonious collection of shoes and handbags, resonating with modern elegance and timeless charm.
 4. Products: 
-Shoes: From the bustling city streets to quiet evening outings, our shoes are tailored to fit every scenario with unmatched style and comfort.
-Handbags: Crafted for the modern individual, our range spans from spacious totes for daily grind to chic clutches for those nights to remember.
+* Coats: Cymbal's elegant and sustainable design extends beyond shoes and handbags, offering a symphony of style with coats that echo timeless charm and modern sophistication.
+* Headset: Offering immersive sound experiences, crafted with sleek lines and durable materials for the modern audiophile.
+* Backpack: Blending practicality with luxury, offering spacious compartments and sophisticated designs to seamlessly transition from work to weekend.
+* Flashlights: Cymbal's flashlights are more than just tools; they're stylish companions for nighttime adventures, featuring innovative designs and eco-friendly materials.
+* Shoes: From the bustling city streets to quiet evening outings, our shoes are tailored to fit every scenario with unmatched style and comfort.
+* Handbags: Crafted for the modern individual, our range spans from spacious totes for daily grind to chic clutches for those nights to remember.
+* Hiking boots: Perfect blend of rugged performance and modern aesthetics, ensuring every step on your adventure is a step towards timeless elegance.
+* Running shoes: Designed to support and propel you forward, featuring cutting-edge technology and a touch of luxury for the style-conscious athlete.
 5. Unique Selling Proposition (USP): A symphony of style. At Cymbal, we believe in orchestrating the perfect balance between trendsetting designs and unparalleled quality.
-6. Target Audience: Style-savvy individuals aged 20-50 who have an ear for quality and an eye for timeless elegance, seeking the perfect accessories to accompany their ever-evolving lifestyles.
-7. Brand Personality: Harmonious, chic, and captivating. Cymbal echoes the rhythm of contemporary fashion with a hint of classic allure.
-8. Core Values: Quality First: Every product at Cymbal resonates with a promise of durability and excellence.
+6. Brand Personality: Harmonious, chic, and captivating. Cymbal echoes the rhythm of contemporary fashion with a hint of classic allure.
+7. Core Values: Quality First: Every product at Cymbal resonates with a promise of durability and excellence.
 Listening to the Beat: We constantly tune into our customer's needs and desires, shaping our collections to mirror the world's evolving fashion pulse.
 Echoing Sustainability: Cymbal strikes a chord with the environment, ensuring eco-friendly practices and sustainable choices are at the forefront.
-9. Brand Tagline: "Echo Your Elegance."
-10. Competitive Landscape: The fashion industry reverberates with many brands, but Cymbal stands distinct with its commitment to harmonizing quality, trend, and sustainability.
-11. Future Outlook: Cymbal aspires to expand its resonance in the global market, infusing more sustainable materials into its products, and initiating special editions through designer partnerships, creating exclusive, melodious collections.
+8. Brand Tagline: "Echo Your Elegance."
+9. Competitive Landscape: The fashion industry reverberates with many brands, but Cymbal stands distinct with its commitment to harmonizing quality, trend, and sustainability.
+10. Future Outlook: Cymbal aspires to expand its resonance in the global market, infusing more sustainable materials into its products, and initiating special editions through designer partnerships, creating exclusive, melodious collections.
 Cymbal is not just a brand; it's an experience. Recognizing the rhythm of life and the melodies of fashion, we ensure every piece adds a note of sophistication to our customer's ensemble. Every choice at Cymbal is a step toward a more stylish tomorrow.
 """
 
 # Prompt template for the "Brand Statement"
 # Change the prompt if needed.
-prompt_brand_statement_template = """Using the Cymbal brand information below as your context, create a brand statement for a campaign targeting {} at age range {} with {} as objective.
-{}
-
-Brand statement: """
+prompt_brand_statement_template = """You are a Campaign Manager working on Google Ads and Google Ad Manager.
+Create a brand statement for a Performance Max campaign with the objective to increase
+online sales as objective. The targeted audience must include segments with these demographics:
+gender {gender}, age group {age_group}, parental status {parental_status}, household income {household_income}.
+Using the Cymbal brand information below as your context.
+{brand_overview}
+Brand Statement:"""
 
 # Prompt template for the "Primary message"
 # Change the prompt if needed.
-prompt_primary_msg_template = """You are working to create a creative brief for Cymbal brand, a document that outlines the creative approach and deliverables for a new project, such as a marketing or advertising campaign. 
-It's a short document that summarizes the project's mission, goals, challenges, demographics, messaging, and other key details. 
-Generate a creative brief for Cymbal's brand for a campaign targeting {} at age range {} with {} as objective and {} as main competitor.
-The creative brief must include the primary message, mission, goals, challenges, demographics and any other relevant details for a clear and concise creative brief. Use the context below to extract any information that you need. 
-{}
-
-Creative brief: """
+prompt_primary_msg_template = """You are a Campaign Manager working on Google Ads and Google Ad Manager at Cymbal.
+Create a campaign briefing for a Performance Max campaign, named {campaign_name}, with the objective to increase
+online sales as objective. The only KPI used will be CTR, ignoring the others.
+The targeted audience must include segments with these demographics:
+gender {gender}, age group {age_group}, parental status {parental_status}, household income {household_income}.
+Use the brand overview below to extract any information that you need. 
+{brand_overview}
+The campaign briefing must include the essential details provided in the following briefing guideline.
+Campaign Briefing Guideline:
+A comprehensive campaign briefing should include the following sections to provide Campaign Managers with all the necessary information to create effective Performance Max campaigns in Google Ads:
+1. Campaign Name: Provide a concise and memorable name for the campaign.
+2. Campaign Objectives: Clearly define the specific goals of the campaign.
+3. Target Audience: List the demographics.
+4. Campaign Duration: Suggest a duration for the Performance Max campaign.
+5. Messaging Strategy
+5.1 Campaign Tone: Determine the overall tone and voice of the campaign messaging.
+5.2 Key Selling Points (USPs): Highlight the unique selling propositions or benefits of the product being advertised (Coat).
+5.3 Core Messaging: Develop concise and compelling messaging that resonates with the target audience.
+7. Creative Asset Guidelines
+7.1 Ad Copy Guidelines: Provide guidelines for the style, tone, and length of ad copy.
+7.2 Visual Guidelines: Specify the desired visual style, including color palette, imagery, and branding elements.
+7.3 Call to Action: Clearly define the desired action for the target audience.
+Campaign Briefing:"""
 
 # Prompt template for "Communication Channel"
 # Change the prompt if needed.
-prompt_comms_channel_template = """I want you to act as a marketing specialist who knows how to create awesome marketing assets. Suggest the best marketing channels for an ads campaign for a new women clothing line."""
+prompt_comms_channel_template = """
+You are a Campaign Manager working on Google Ads and Google Ad Manager at Cymbal.
+Generate Marketing Channels Recommendations for a Performance Max campaign, named {campaign_name}, with the objective to increase
+online sales as objective. The only KPI used will be CTR, ignoring the others.
+The targeted audience must include segments with these demographics:
+gender {gender}, age group {age_group}, parental status {parental_status}, household income {household_income}.
+Use the brand overview below to extract any information that you need. 
+{brand_overview}
+
+Channel Guideline:
+1. Recommended Channels: Identify the most suitable advertising channels for reaching the target audience, such as Google Search, Display, Social Media, or Youtube.
+2. Budget Allocation: Allocate the campaign budget across the recommended channels.
+
+Marketing Channels Recommendations:"""
 
 # Brand name
 # Change to your brand name if needed.
@@ -149,24 +186,32 @@ prompt_business_name = "Cymbal"
 # as options for the users.
 # Change these parameters if needed.
 prompt_genders =[
-    'Women',
-    'Men'
+    'Female',
+    'Male',
+    'Unknown'
 ]
 prompt_age_groups =[
-    '20-30',
-    '30-40',
-    '40-50'
+    '18-24',
+    '25-34',
+    '35-44',
+    '45-54',
+    '55-64',
+    '65+',
+    'Unknown'
 ]
-prompt_objectives = [
-    'Drive Awareness',
-    'Increasing Traffic',
-    'Increasing Engagement',
-    'Increasing Sales'
+prompt_parental_status = [
+    'Parent', 
+    'Not a parent',
+    'Unknown'
 ]
-prompt_competitors = [
-    'Fashion Forward',
-    'Style Setter',
-    'Wardrobe Wonder'
+prompt_household_income = [
+    'Lower 50%',
+    '41-50%',
+    '31-40%',
+    '21-30%',
+    '11-20%',
+    'Top 10%',
+    'Unknown'
 ]
 
 
@@ -622,9 +667,9 @@ page_title_icon = "../app/images/activate_icon.png"
 # ID of the templates
 # Change this variables according to your Google Workspace settings
 drive_folder_id = '15OJmSuDduDs_UYQJi1nPki1lce--lxxX' # example: "1MYB0Ybyo9XZERgIcjsdfeqO0SKqhrkvqMx"
-slides_template_id = '15OJmSuDduDs_UYQJi1nPki1lce--lxxX' # example: '16uQlLkCJ9YRiMU_IoONHsl-vY-uKeoasnWTPlbZZ1D4'
-doc_template_id = '1V8uiH-_VnwczxYRBy3ZdCXVmAXGQJudn' # example: '1kqvxZLRXIdfM8MVS7css4UoiJ8f0I4dKFj9cP986K4pM'
-sheet_template_id = '1H64_CrIPJBKOfNPaZwH-_SNOPlK_Meen' # example: '1gIaIWLOeKmnjso7-CAAAcqMlPznpoEXDdEue3DNWr7bw'
+slides_template_id = '151mKV5MXl6Q5NHdM1lWy-mCP1S32EPIY4FMJmkWfPio' # example: '16uQlLkCJ9YRiMU_IoONHsl-vY-uKeoasnWTPlbZZ1D4'
+doc_template_id = '1wrZ6ssa26Lp2FqGaX2hvyXHsJueprvslBdvAaP78ffE' # example: '1kqvxZLRXIdfM8MVS7css4UoiJ8f0I4dKFj9cP986K4pM'
+sheet_template_id = '1CprGVUwD30groN-KFJj5MOVSL6au6i_E-syiyjPk098' # example: '1gIaIWLOeKmnjso7-CAAAcqMlPznpoEXDdEue3DNWr7bw'
 slide_page_id_list = ["p3","p4","p5","p6","p7","p8"] # LIST OF PAGES WHERE YOU WANT TO INSERT CHARTS FROM THE SHEETS
 
 # Scope for the Workspace API - don't change

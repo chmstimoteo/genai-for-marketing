@@ -23,6 +23,8 @@ import streamlit.components.v1 as components
 import time
 import utils_workspace
 
+import traceback
+
 from PIL import Image, ImageOps
 from vertexai.preview.language_models import TextGenerationModel
 from utils_campaign import Campaign, add_new_campaign
@@ -74,8 +76,8 @@ COMMS_CHANNEL_PROMPT_TEMPLATE = page_cfg["prompt_comms_channel_template"]
 BUSINESS_NAME = page_cfg["prompt_business_name"]
 GENDER_FOR_PROMPTS = page_cfg["prompt_genders"]
 AGEGROUP_FOR_PROMPTS = page_cfg["prompt_age_groups"]
-OBJECTIVES_FOR_PROMPTS = page_cfg["prompt_objectives"]
-COMPETITORS_FOR_PROMPTS = page_cfg["prompt_competitors"]
+PARENTAL_STATUS_FOR_PROMPTS = page_cfg["prompt_parental_status"]
+HOUSEHOLD_INCOME_FOR_PROMPTS = page_cfg["prompt_household_income"]
 PROMPT_THEMES = page_cfg["prompt_themes"]
 
 # Variables for Workspace integration
@@ -116,14 +118,14 @@ with tab1:
         
         col1, col2 = st.columns([1,1])
         with col1:
-            objective_select_theme = st.selectbox(
-                'Select the objective:',
-                options=OBJECTIVES_FOR_PROMPTS)
+            parental_status_select_theme = st.selectbox(
+                'Select the parental status:',
+                options=PARENTAL_STATUS_FOR_PROMPTS)
 
         with col2:
-            competitor_select_theme = st.selectbox(
-                'Select the chief competitor:',
-                options=COMPETITORS_FOR_PROMPTS)
+            household_income_select_theme = st.selectbox(
+                'Select the Household income:',
+                options=HOUSEHOLD_INCOME_FOR_PROMPTS)
 
         create_campaign_button = st.form_submit_button()
     # Create selectbox
@@ -170,34 +172,39 @@ with tab1:
             is_allowed_to_create_campaign = True
 
         if is_allowed_to_create_campaign and theme != "":
+            
             async def generate_campaign() -> tuple:
                 return await asyncio.gather(
                     async_predict_text_llm(
                         BRAND_STATEMENT_PROMPT_TEMPLATE.format(
-                            gender_select_theme, 
-                            age_select_theme,
-                            objective_select_theme,
-                            competitor_select_theme,
-                            BRAND_OVERVIEW),
+                            gender=gender_select_theme, 
+                            age_group=age_select_theme,
+                            parental_status=parental_status_select_theme,
+                            household_income=household_income_select_theme,
+                            brand_overview=BRAND_OVERVIEW),
                         "Brand Statement",
                         TEXT_MODEL_NAME),
                     async_predict_text_llm(
                         PRIMARY_MSG_PROMPT_TEMPLATE.format(
-                            gender_select_theme, 
-                            age_select_theme,
-                            objective_select_theme,
-                            competitor_select_theme,
-                            BRAND_OVERVIEW),
-                        "Brand Strategy",
+                            campaign_name=campaign_name,
+                            gender=gender_select_theme, 
+                            age_group=age_select_theme,
+                            parental_status=parental_status_select_theme,
+                            household_income=household_income_select_theme,
+                            brand_overview=BRAND_OVERVIEW),
+                        "Campaign Briefing",
                         TEXT_MODEL_NAME),
                     async_predict_text_llm(
                         COMMS_CHANNEL_PROMPT_TEMPLATE.format(
-                            gender_select_theme, 
-                            age_select_theme,
-                            objective_select_theme,
-                            competitor_select_theme),
-                        "Communication channels",
-                        TEXT_MODEL_NAME)) 
+                            campaign_name=campaign_name,
+                            gender=gender_select_theme, 
+                            age_group=age_select_theme,
+                            parental_status=parental_status_select_theme,
+                            household_income=household_income_select_theme,
+                            brand_overview=BRAND_OVERVIEW),
+                        "Marketing Channels Recommendations",
+                        TEXT_MODEL_NAME)
+                ) 
             try:
                 generated_tuple = asyncio.run(generate_campaign())
                 st.session_state[BRAND_STATEMENT_KEY] = generated_tuple[0] 
@@ -206,8 +213,8 @@ with tab1:
                 st.session_state[THEMES_FOR_PROMPTS_KEY] = (
                     f'Targeting gender: {gender_select_theme}, '
                     f'Age group: {age_select_theme}, '
-                    f'Campaign objective: {objective_select_theme}, '
-                    f'Competitor: {competitor_select_theme}')
+                    f'Parental status: {parental_status_select_theme}, '
+                    f'Household income: {household_income_select_theme}')
             except:
                 st.info('Something went wrong with your prompt. Try again.')
             else:
@@ -249,9 +256,11 @@ with tab1:
                         scenario=clean(brief["brief_scenario"]), 
                         brand_statement=clean(brief["brand_statement"]),
                         primary_msg=clean(brief["primary_message"]), 
-                        comms_channel=clean(brief["comm_channels"]))
+                        comms_channel=clean(brief["comm_channels"])
+                        )
             except:
                 del st.session_state[CAMPAIGNS_KEY][campaign_uuid]
+                st.write(traceback.format_exc())
                 st.info("Campaign could not be created. Please try again.")
             else:
                 st.success(f"Campaign '{campaign_name}' generated "

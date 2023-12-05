@@ -35,6 +35,8 @@ import backoff
 from newspaper import Article
 from newspaper import ArticleException
 
+from utils_config import GLOBAL_CFG, MODEL_CFG, PAGES_CFG
+
 # Major US Cities with DMA Codes
 DMA_MAJOR_CITIES = [
 {'city': 'Ada', 'dma_code': 657, 'latitude': 34.774531000000003, 'longitude': -96.678344899999999, 'region': 'OK', 'slug': 'ada-ok'},

@@ -17,6 +17,8 @@
 import io
 import uuid
 
+import streamlit as st 
+
 from google.oauth2 import service_account
 from googleapiclient import discovery
 from googleapiclient.discovery import build
@@ -26,15 +28,15 @@ from googleapiclient.http import MediaIoBaseDownload
 from utils_config import GLOBAL_CFG, PAGES_CFG
 
 
-SCOPES = PAGES_CFG["12_review_activate"]["workspace_scopes"]
-CREDENTIALS = service_account.Credentials.from_service_account_file(
-    filename=GLOBAL_CFG["service_account_json_key"], scopes=SCOPES)
+#SCOPES = PAGES_CFG["12_review_activate"]["workspace_scopes"]
+#CREDENTIALS = service_account.Credentials.from_service_account_file(
+#    filename=GLOBAL_CFG["service_account_json_key"], scopes=SCOPES)
 
 
-drive_service = build('drive', 'v3', credentials=CREDENTIALS)
-docs_service = build('docs', 'v1', credentials=CREDENTIALS)
-sheets_service = discovery.build('sheets', 'v4', credentials=CREDENTIALS)
-slides_service = build('slides', 'v1', credentials=CREDENTIALS)
+drive_service = build('drive', 'v3')#, credentials=CREDENTIALS)
+docs_service = build('docs', 'v1')#, credentials=CREDENTIALS)
+sheets_service = discovery.build('sheets', 'v4')#, credentials=CREDENTIALS)
+slides_service = build('slides', 'v1')#, credentials=CREDENTIALS)
 
 
 
@@ -42,11 +44,13 @@ def create_folder_in_folder(
         folder_name: str, 
         parent_folder_id: str
     ):
+
     file_metadata = {
         'name' : folder_name,
         'parents' : [parent_folder_id],
         'mimeType' : 'application/vnd.google-apps.folder'
     }
+
     file = drive_service.files().create(body=file_metadata,
                                     fields='id',
                                     supportsAllDrives=True).execute()
@@ -119,7 +123,8 @@ def update_doc(
         scenario: str,
         brand_statement: str, 
         primary_msg: str, 
-        comms_channel: str):
+        comms_channel: str
+):
     
     requests = [
             {

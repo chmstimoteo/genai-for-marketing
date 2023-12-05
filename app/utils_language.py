@@ -164,7 +164,7 @@ def generate_llm_audience_segment_insights(
         question_option = st.text_area(
             label=("Write your question to ask PaLM API "
                    "and generate your audience segment insight"),
-            value=f"Describe each persona by their gender, interests and affinity, parental status and estimated household income",
+            value=f"Describe each persona by their gender, age range, interests and affinity, parental status and estimated household income.",
             key=f"{state_key}_question_prompt_text_area")
 
     if submit_button:

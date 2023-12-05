@@ -34,6 +34,8 @@ RUN pip3 install streamlit-image-select==0.6.0
 RUN pip3 install google-cloud-discoveryengine
 RUN pip3 install google-cloud-translate
 RUN pip3 install cloudpickle
+RUN pip3 install --upgrade git+https://github.com/GeneralMills/pytrends
+RUN pip3 install backoff
 
 # Copy local code to the container image.
 WORKDIR /app

@@ -62,10 +62,10 @@ search_location = "global"
 
 # ID of the templates
 # Change this variables according to your Google Workspace settings
-drive_folder_id = "" # example: "1MYB0Ybyo9XZERgIcjsdfeqO0SKqhrkvqMx"
-slides_template_id = "" # example: '16uQlLkCJ9YRiMU_IoONHsl-vY-uKeoasnWTPlbZZ1D4'
-doc_template_id = "" # example: '1kqvxZLRXIdfM8MVS7css4UoiJ8f0I4dKFj9cP986K4pM'
-sheet_template_id = "" # example: '1gIaIWLOeKmnjso7-CAAAcqMlPznpoEXDdEue3DNWr7bw'
+drive_folder_id = '15OJmSuDduDs_UYQJi1nPki1lce--lxxX' # example: "1MYB0Ybyo9XZERgIcjsdfeqO0SKqhrkvqMx"
+slides_template_id = '151mKV5MXl6Q5NHdM1lWy-mCP1S32EPIY4FMJmkWfPio' # example: '16uQlLkCJ9YRiMU_IoONHsl-vY-uKeoasnWTPlbZZ1D4'
+doc_template_id = '1wrZ6ssa26Lp2FqGaX2hvyXHsJueprvslBdvAaP78ffE' # example: '1kqvxZLRXIdfM8MVS7css4UoiJ8f0I4dKFj9cP986K4pM'
+sheet_template_id = '1CprGVUwD30groN-KFJj5MOVSL6au6i_E-syiyjPk098' # example: '1gIaIWLOeKmnjso7-CAAAcqMlPznpoEXDdEue3DNWr7bw'
 slide_page_id_list = ["p3","p4","p5","p6","p7","p8"] # LIST OF PAGES WHERE YOU WANT TO INSERT CHARTS FROM THE SHEETS
 
 # -----------------------------------------------------------------------------
