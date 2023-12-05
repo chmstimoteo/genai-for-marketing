@@ -19,21 +19,21 @@ FROM python:3.11-slim
 ENV PYTHONUNBUFFERED True
 
 # Install python packages
-RUN pip install google-cloud-datacatalog
-RUN pip install db-dtypes
-RUN pip install -U google-cloud-aiplatform 
-RUN pip install pandas 
-RUN pip install google-api-python-client 
-RUN pip install python-dateutil 
-RUN pip install newspaper3k 
-RUN pip install google-cloud-bigquery
-RUN pip install -U streamlit
-RUN pip install pillow
-RUN pip install streamlit-drawable-canvas==0.9.1
-RUN pip install streamlit-image-select==0.6.0
-RUN pip install google-cloud-discoveryengine
-RUN pip install google-cloud-translate
-RUN pip install cloudpickle
+RUN pip3 install google-cloud-datacatalog
+RUN pip3 install db-dtypes
+RUN pip3 install -U google-cloud-aiplatform 
+RUN pip3 install pandas 
+RUN pip3 install google-api-python-client 
+RUN pip3 install python-dateutil 
+RUN pip3 install newspaper3k 
+RUN pip3 install google-cloud-bigquery
+RUN pip3 install -U streamlit
+RUN pip3 install pillow
+RUN pip3 install streamlit-drawable-canvas==0.9.1
+RUN pip3 install streamlit-image-select==0.6.0
+RUN pip3 install google-cloud-discoveryengine
+RUN pip3 install google-cloud-translate
+RUN pip3 install cloudpickle
 
 # Copy local code to the container image.
 WORKDIR /app

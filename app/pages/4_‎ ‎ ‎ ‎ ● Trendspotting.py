@@ -33,6 +33,7 @@ from utils_config import GLOBAL_CFG, MODEL_CFG, PAGES_CFG
 from utils_trendspotting import GDELTRetriever
 from utils_trendspotting import GoogleTrends
 from utils_trendspotting import summarize_news_article
+from utils_trendspotting import DMA_MAJOR_CITIES
 from vertexai.preview.language_models import TextGenerationModel
 
 
@@ -63,6 +64,9 @@ default_date_value = date.today() - timedelta(2)
 max_date_value = date.today() - timedelta(2)
 min_date_value = date.today() - timedelta(26)
 
+interest_max_date_value = date.today() - timedelta(2)
+interest_min_date_value = date.today() - timedelta(92)
+
 # State variables for news summarization
 PAGE_KEY_PREFIX = "Trendspotting"
 SUMMARIZATION_PREFIX = f"{PAGE_KEY_PREFIX}_Summarization"
@@ -89,26 +93,27 @@ with cols_page[1]:
     )
 
 
-    st.subheader('Google Trends dataset')
-    st.write(
-        "The following dashboard demonstrates "
-        "the top search terms in the US for "
-        "the latest available data. "
-        "This query looks at the latest data available to "
-        "return the top 25 search terms in the US for "
-        "the most recent week available."
-    )
+    #st.subheader('Google Trends dataset')
+    #st.write(
+    #    "The following dashboard demonstrates "
+    #    "the top search terms in the US for "
+    #    "the latest available data. "
+    #    "This query looks at the latest data available to "
+    #    "return the top 25 search terms in the US for "
+    #    "the most recent week available."
+    #)
 
 # Renders the Google trends dashboard
-components.iframe(
-    src='https://datasignals.looker.com/embed/dashboards/11?theme=GoogleWhite',
-    height=800, 
-    scrolling=False
-)
+#components.iframe(
+#    src='https://datasignals.looker.com/embed/dashboards/11?theme=GoogleWhite',
+#    height=800, 
+#    scrolling=False
+#)
 
 cols_page = st.columns([14,72,14])
 with cols_page[1]:
     # Google Trends retrieval tool ###########
+    st.subheader('Google Trends')
     st.write(
         "Using the form below, select a date " 
         "to retrieve the top 1 search term(s) in the US."
@@ -140,8 +145,140 @@ with cols_page[1]:
             f'{st.session_state[TOP_SEARCH_TERM_DATE_KEY]} is: '
             f'{" ".join(st.session_state[TOP_SEARCH_TERM_KEY])}')
     ##########################################
+       
+cols_page = st.columns([14,72,14])
+with cols_page[1]:
+    # Google Trends Search #####################
+    st.write(
+        "Using the form below, type a Search term, select a US city "
+        "and select a date interval " 
+        "to retrieve Google Trends data."
+    )
+    with st.form('form_google_trends_interest'):
+        st.write("**Google Trends Search Interest in US**")
+        interest_keyword = st.text_input('Search term', 'Coat')
 
-    # News Summarization #####################
+        #Getting DMA_MAJOR_CITIES selection
+        select_box_options = [f"{item['city']} - {item['region']}" for item in DMA_MAJOR_CITIES]
+        question_option = st.selectbox(
+            label=("Select a City/State"),
+            options=select_box_options,
+            index=select_box_options.index("Austin - TX"),
+            #key=f"{state_key}_question_prompt_text_area"
+            )
+
+        #Selecting the dates intervals
+        min_selected_date = st.date_input(
+            'Select a starting date for Google Trends',
+            interest_min_date_value,
+            min_value=interest_min_date_value,
+            max_value=interest_max_date_value)
+        assert isinstance(min_selected_date, date)
+        min_trends_date = date.strftime(min_selected_date, '%Y-%m-%d')
+        
+        max_selected_date = st.date_input(
+            'Select a ending date for Google Trends',
+            interest_max_date_value,
+            min_value=interest_min_date_value,
+            max_value=interest_max_date_value)
+        assert isinstance(max_selected_date, date)
+        max_trends_date = date.strftime(max_selected_date, '%Y-%m-%d')
+
+        trend_button_trend = st.form_submit_button('Get Interest and Related Queries')
+
+    if trend_button_trend or (f"{PAGE_KEY_PREFIX}_Trends_Search_Interest" in st.session_state
+                              and f"{PAGE_KEY_PREFIX}_Trends_Search_Queries" in st.session_state
+                              and f"{PAGE_KEY_PREFIX}_Trends_Search_URL" in st.session_state):
+        with st.spinner("Querying..."):
+            google_trends_tool = GoogleTrends(
+                project_id=PROJECT_ID, bq_client=bq_client)
+            google_trends_tool.get_search_interests_queries(
+                interest_keyword=interest_keyword,
+                min_trends_date=min_trends_date,
+                max_trends_date=max_trends_date,
+                state_key_interests=f"{PAGE_KEY_PREFIX}_Trends_Search_Interest",
+                state_key_queries=f"{PAGE_KEY_PREFIX}_Trends_Search_Queries")
+            google_trends_tool.get_url(
+                interest_keyword=interest_keyword,
+                min_trends_date=min_trends_date,
+                max_trends_date=max_trends_date,
+                state_key_url=f"{PAGE_KEY_PREFIX}_Trends_Search_URL")
+
+if (f"{PAGE_KEY_PREFIX}_Trends_Search_Interest" in st.session_state) and \
+   (f"{PAGE_KEY_PREFIX}_Trends_Search_Queries" in st.session_state) and \
+   (f"{PAGE_KEY_PREFIX}_Trends_Search_URL" in st.session_state):
+    
+    cols_page = st.columns([14,72,14])
+    with cols_page[1]:
+        default_url = "https://trends.google.com/trends/explore?date=2023-09-04%202023-12-04&geo=US-TX-635&q=%2Fm%2F01xygc"
+        
+        if st.session_state[f"{PAGE_KEY_PREFIX}_Trends_Search_URL"]:
+            url = st.session_state[f"{PAGE_KEY_PREFIX}_Trends_Search_URL"]
+        else:
+            url = default_url
+
+        st.write('')
+        st.write("If the charts below ask you to try in again in a bit. Check out this [link](%s)" % url)
+        st.write('')
+
+    cols_page = st.columns([14,36,36,14])
+    with cols_page[1]:
+        components.html("""
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <style>
+        .myDiv {
+        border: 1px outset lightblue;
+        background-color: lightgray;
+        text-align: left;
+        }
+        </style>
+        </head>
+        <body>
+        <script type="text/javascript" src="https://ssl.gstatic.com/trends_nrtr/3523_RC02/embed_loader.js"></script> 
+        <script type="text/javascript"> trends.embed.renderExploreWidget("TIMESERIES", {"comparisonItem":[{"keyword":"/m/01xygc","geo":"US-TX-635","time":"2023-09-04 2023-12-04"}],"category":0,"property":""}, {"exploreQuery":"date=2023-09-04%202023-12-04&geo=US-TX-635&q=zcxzvxcv","guestPath":"https://trends.google.com:443/trends/embed/"}); </script>
+        <script type="text/javascript">
+        document.getElementsByTagName("iframe")[0].addEventListener( "load", function(e) {
+            this.setAttribute('height','450px')
+        } );
+        </script>
+        </body>
+        </html>""",
+        height=450,
+        width=350
+        )
+
+    with cols_page[2]:
+        components.html("""
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <style>
+        .myDiv {
+        border: 1px outset lightblue;
+        background-color: lightgray;
+        text-align: left;
+        }
+        </style>
+        </head>
+        <body>
+        <script type="text/javascript" src="https://ssl.gstatic.com/trends_nrtr/3523_RC02/embed_loader.js"></script>
+        <script type="text/javascript"> trends.embed.renderExploreWidget("RELATED_QUERIES", {"comparisonItem":[{"keyword":"/m/01xygc","geo":"US-TX-635","time":"2023-09-04 2023-12-04"}],"category":0,"property":""}, {"exploreQuery":"date=2023-09-04%202023-12-04&geo=US-TX-635&q=%2Fm%2F01xygc","guestPath":"https://trends.google.com:443/trends/embed/"}); </script>
+        <script type="text/javascript">
+        document.getElementsByTagName("iframe")[0].addEventListener( "load", function(e) {
+            this.setAttribute('height','450px')
+        } );
+        </script>
+        </body>
+        </html>""",
+            height=450,
+            width=350)
+    ##########################################
+
+# News Summarization #####################
+cols_page = st.columns([14,72,14])
+with cols_page[1]:
     st.subheader('News Summarization')
     st.write(
         "Provide keywords to retrive summaries " 
@@ -212,8 +349,8 @@ with cols_page[1]:
         for summary in st.session_state[SUMMARIZATION_SUMMARIES_KEY]:
             st.divider()
             st.write(f"""
-                     **Original Headline**: {summary["original_headline"]}.\n
-                     **Summary**: {summary["summary"]}""")
+                        **Original Headline**: {summary["original_headline"]}.\n
+                        **Summary**: {summary["summary"]}""")
     ##########################################
 
     if (SUMMARIZATION_SUMMARIES_KEY in st.session_state and

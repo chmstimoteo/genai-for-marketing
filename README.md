@@ -90,7 +90,7 @@ gcloud services enable \
   cloudapis.googleapis.com \
   cloudtrace.googleapis.com \
   containerregistry.googleapis.com \
-  iamcredentials.googleapis.com
+  iamcredentials.googleapis.com 
 
 gcloud services enable \
   monitoring.googleapis.com \
@@ -106,6 +106,11 @@ gcloud services enable \
   drive.googleapis.com \
   sheets.googleapis.com \
   slides.googleapis.com
+
+gcloud services enable \
+  datacatalog.googleapis.com \
+  dialogflow.googleapis.com \
+  iam.googleapis.com
 ```
 
 **Note**: When you work with Vertex AI user-managed notebooks, be sure that all the services that you're using are enabled.

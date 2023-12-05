@@ -18,7 +18,7 @@
 [global]
 
 # Replace with your project ID and location
-project_id = ""
+project_id = "ctimoteo-genaimkt-generate"
 location = "us-central1"
 
 # Provide the path to your JSON credential
@@ -64,10 +64,10 @@ code.code_model_name = "code-bison"
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - file_name_*: Images for this page.
 page_title = "Gen AI for Marketing"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-file_name_1 = "/app/images/intro_home_1.1.png"
-file_name_2 = "/app/images/intro_home_2.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+file_name_1 = "../app/images/intro_home_1.1.png"
+file_name_2 = "../app/images/intro_home_2.png"
 
 
 # -----------------------------------------------------------------------------
@@ -81,14 +81,14 @@ file_name_2 = "/app/images/intro_home_2.png"
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - page_title_icon: Image that goes on the left side of the main title of this page.
 page_title = "Campaigns"
-page_icon = "/app/images/favicon.png"
-page_title_icon = "/app/images/logo.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
+page_icon = "../app/images/favicon.png"
+page_title_icon = "../app/images/logo.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
 campaigns_key = "Campaigns"
 
 # This variable will be used to give permissions to all users under this domain
 # This permission is related to the Workspace Drive folder
-domain = "<YOUR DOMAIN>"
+domain = "google.com"
 
 # Default themes 
 # (optional) Include or remove themes as needed
@@ -181,9 +181,9 @@ prompt_competitors = [
 # - file_name: Images for this page.
 [pages.1_analytics_insights]
 page_title = "Analytics and Insights"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-file_name = "/app/images/page_1.1.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+file_name = "../app/images/page_1.1.png"
 
 
 # -----------------------------------------------------------------------------
@@ -197,9 +197,9 @@ file_name = "/app/images/page_1.1.png"
 # - page_title_icon: Image that goes on the left side of the main title of this page.
 [pages.2_marketing_insights]
 page_title = "Marketing Insights"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-page_title_image = "/app/images/marketing_analytics_icon.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+page_title_image = "../app/images/marketing_analytics_icon.png"
 
 # Looker Dashboards
 # The link of the looker Dashboard must follow this format:
@@ -220,16 +220,16 @@ dashboards.Overview = 'https://googledemo.looker.com/embed/dashboards/2131?allow
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - page_title_icon: Image that goes on the left side of the main title of this page.
 page_title = "Audiences"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-page_title_image = "/app/images/audience_icon.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+page_title_image = "../app/images/audience_icon.png"
 
 # Dataset ID of the BigQuery dataset. If you change the dataset_id during the deployment 
 # of this solution, change it here as well.
-dataset_id = ""
+dataset_id = "cdp_dataset"
 
 # Tag name for the Dataplex Tag manager.
-tag_name = ""
+tag_name = "llmcdptemplate"
 
 # Prompt used to generate SQL from questions using natural language.
 # You can change this prompt if needed. 
@@ -246,6 +246,67 @@ prompt_examples = [
 prompt_example_0 = "What are the customer emails ordered by the sum of transactions value by customers in New York City?"
 prompt_example_1 = "What is the city and state with the most quantity of customers transactions?"
 prompt_example_2 = "What are the top 50 customer emails ordered by loyalty score?"
+prompt_example_3 = "What are the products with higher transaction value?"
+prompt_example_4 = "What are the top 10 cities and states of the customers who bought more Coat?"
+prompt_example_5 = "What are the top 10 cities and states of the customers who bought less Coat?"
+
+# The following are default Text2SQL examples to guide the LLM API to generate better GoogleSQL code
+text2sql_examples_template = """Examples converting Text to GoogleSQL: 
+[Q]: What is the city and state with the most customer transactions?
+[SQL]: SELECT c.city, c.state, SUM(t.transaction_qnt) as total_transactions
+FROM `{project_id}.{dataset_id}.customers` AS c
+JOIN `{project_id}.{dataset_id}.transactions` as t
+ON c.customer_id = t.customer_id
+GROUP BY c.city, c.state
+ORDER BY total_transactions DESC
+[Q]: What are the customer emails ordered by the quantity of purchases by the customer in the city of Atlanta and the state of Georgia?
+[SQL]: SELECT c.email, c.total_purchases 
+FROM `{project_id}.{dataset_id}.customers` as c
+WHERE c.city = "Atlanta" AND c.state = "Georgia"
+ORDER BY c.total_purchases DESC
+[Q]: What are the customer emails ordered by the total transactions in app by the customer in the city of Atlanta and the state of Georgia?
+[SQL]: SELECT c.email, SUM(t.app_purchase_qnt) as total_app_purchase
+FROM `{project_id}.{dataset_id}.customers` as c
+JOIN `{project_id}.{dataset_id}.transactions` as t
+ON c.customer_id = t.customer_id
+WHERE c.city = "Atlanta" AND c.state = "Georgia"
+GROUP BY c.email, c.city, c.state
+ORDER BY total_app_purchase DESC
+[Q]: Retrieve top 10 customer emails ordered by loyalty score
+[SQL]: SELECT c.email
+FROM `{project_id}.{dataset_id}.customers` as c
+ORDER BY c.loyalty_score DESC
+[Q]: what are the top 10 cities and states of the customers who bought less coats?
+[SQL]: SELECT c.city, c.state, SUM(t.transaction_quantity) AS total_coats
+FROM `{project_id}.{dataset_id}.customers` AS c
+JOIN `{project_id}.{dataset_id}.transactions` AS t
+ON c.customer_id = t.customer_id
+WHERE t.product_name LIKE '%Coat%'
+GROUP BY c.city, c.state
+ORDER BY total_coats ASC
+LIMIT 10;
+[Q]: what are the top 10 cities and states of the customers who bought more coats?
+[SQL]: SELECT c.city, c.state, SUM(t.transaction_quantity) AS total_coats
+FROM `{project_id}.{dataset_id}.customers` AS c
+JOIN `{project_id}.{dataset_id}.transactions` AS t
+ON c.customer_id = t.customer_id
+WHERE t.product_name LIKE '%Coat%'
+GROUP BY c.city, c.state
+ORDER BY total_coats DESC
+LIMIT 10;
+"""
+
+# The following is an initial context template to prompt text PaLM API when generating 
+# Audience Segment Insights
+text_prompt_segments_insights_template = """You are a market analyst working for an online retailer with an ecommerce store.
+The marketing team is interested in getting audience segments insights associated to a set of already identified personas.
+Answer the question and summarize the answer in paragraphs.
+Personas are provided by Google Ads. The first column identifies the Persona, the following columns provided additional 
+information about the personas.
+Personas:
+{personas}
+Question:
+"""
 
 # -----------------------------------------------------------------------------
 # Configurations for 4_Trendspotting.py
@@ -258,9 +319,9 @@ prompt_example_2 = "What are the top 50 customer emails ordered by loyalty score
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - page_title_icon: Image that goes on the left side of the main title of this page.
 page_title = "Trendspotting"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-page_title_image = "/app/images/trend_icon.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+page_title_image = "../app/images/trend_icon.png"
 
 
 # -----------------------------------------------------------------------------
@@ -274,14 +335,15 @@ page_title_image = "/app/images/trend_icon.png"
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - page_title_icon: Image that goes on the left side of the main title of this page.
 page_title = "Consumer Insights"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-page_title_image = "/app/images/consumer_icon.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+page_title_image = "../app/images/consumer_icon.png"
 
 # Vertex AI Search datastores and location. 
 # Change the dataset variable to reflect your configuration.
 # Sample datastore ID
 # datastores.<datastore ID> = 'default_config'
+datastores.google-ads-support_1701449807224 = 'default_config'
 search_location = "global"
 
 
@@ -296,9 +358,9 @@ search_location = "global"
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - file_name_*: Images for this page.
 page_title = "Content Generation"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-file_name = "/app/images/page_2.1.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+file_name = "../app/images/page_2.1.png"
 
 
 # -----------------------------------------------------------------------------
@@ -312,9 +374,9 @@ file_name = "/app/images/page_2.1.png"
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - page_title_icon: Image that goes on the left side of the main title of this page.
 page_title = "Email Copy"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-page_title_image = "/app/images/email_icon.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+page_title_image = "../app/images/email_icon.png"
 
 # Default prompt for email copy generation
 # You can change this prompt to generate different email copies.
@@ -388,10 +450,10 @@ female_names = [
 # reference: https://cloud.google.com/translate/docs/languages
 languages =  ["es","zh","cs","da","fr","el","it","ja","pt"]
 
-local_email_image = ["/app/images/email_image_0.png",
- "/app/images/email_image_1.png",
- "/app/images/email_image_2.png",
- "/app/images/email_image_3.png"]
+local_email_image = ["../app/images/email_image_0.png",
+ "../app/images/email_image_1.png",
+ "../app/images/email_image_2.png",
+ "../app/images/email_image_3.png"]
 
 
 # -----------------------------------------------------------------------------
@@ -405,9 +467,9 @@ local_email_image = ["/app/images/email_image_0.png",
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - page_title_icon: Image that goes on the left side of the main title of this page.
 page_title = "Website Post"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-page_title_image = "/app/images/website_icon.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+page_title_image = "../app/images/website_icon.png"
 
 # Default prompt for website post generation
 # Change this prompt if needed.
@@ -422,10 +484,10 @@ Generate a blog post for {}.
 prompt_image_template = """Generate an image for {}"""
 
 local_images = [
-    "/app/images/website_1.png", 
-    "/app/images/website_2.png", 
-    "/app/images/website_3.png", 
-    "/app/images/website_4.png"
+    "../app/images/website_1.png", 
+    "../app/images/website_2.png", 
+    "../app/images/website_3.png", 
+    "../app/images/website_4.png"
 ]
 
 
@@ -440,9 +502,9 @@ local_images = [
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - page_title_icon: Image that goes on the left side of the main title of this page.
 page_title = "Social Media"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-page_title_image = "/app/images/social_icon.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+page_title_image = "../app/images/social_icon.png"
 
 # Dafault instagram gender
 instagram_gender_options = ["All", "Men", "Women"]
@@ -462,9 +524,9 @@ Generate a social media ad for {}: """
 # You can change this prompt if needed.
 image_prompt_template = """Generate an image for {}"""
 
-local_image_instagram = ["/app/images/social_instagram_0.png", "/app/images/social_instagram_1.png", "/app/images/social_instagram_2.png", "/app/images/social_instagram_3.png"]
+local_image_instagram = ["../app/images/social_instagram_0.png", "../app/images/social_instagram_1.png", "../app/images/social_instagram_2.png", "../app/images/social_instagram_3.png"]
 
-local_image_threads = ["/app/images/social_threads_0.png", "/app/images/social_threads_1.png", "/app/images/social_threads_2.png", "/app/images/social_threads_3.png"]
+local_image_threads = ["../app/images/social_threads_0.png", "../app/images/social_threads_1.png", "../app/images/social_threads_2.png", "../app/images/social_threads_3.png"]
 
 # -----------------------------------------------------------------------------
 # Configurations for 10_Asset_Group_Pmax.py page
@@ -477,9 +539,9 @@ local_image_threads = ["/app/images/social_threads_0.png", "/app/images/social_t
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - page_title_icon: Image that goes on the left side of the main title of this page.
 page_title = "Asset Group for PMax"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-page_title_image = "/app/images/asset_icon.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+page_title_image = "../app/images/asset_icon.png"
 
 # Default prompt template for image generation
 # You can change this prompt if needed.
@@ -524,7 +586,7 @@ call_to_action = [
 
 asset_group_description = "Cymbal's new collection of women's handbags is a symphony of style, featuring a harmonious blend of trendsetting designs and unparalleled quality."
 
-local_image_asset = [["/app/images/asset_group_0_0.png","/app/images/asset_group_0_1.png"], ["/app/images/asset_group_1_0.png", "/app/images/asset_group_1_1.png"], ["/app/images/asset_group_2_0.png", "/app/images/asset_group_2_1.png"], ["/app/images/asset_group_3_0.png", "/app/images/asset_group_3_1.png"]]
+local_image_asset = [["../app/images/asset_group_0_0.png","../app/images/asset_group_0_1.png"], ["../app/images/asset_group_1_0.png", "../app/images/asset_group_1_1.png"], ["../app/images/asset_group_2_0.png", "../app/images/asset_group_2_1.png"], ["../app/images/asset_group_3_0.png", "../app/images/asset_group_3_1.png"]]
 
 
 # -----------------------------------------------------------------------------
@@ -538,9 +600,9 @@ local_image_asset = [["/app/images/asset_group_0_0.png","/app/images/asset_group
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - file_name_*: Images for this page.
 page_title = "Activation & Optimization"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-file_name = "/app/images/page_3.1.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+file_name = "../app/images/page_3.1.png"
 
 # -----------------------------------------------------------------------------
 # Configurations for 12_Review_Activate.py =========
@@ -553,16 +615,16 @@ file_name = "/app/images/page_3.1.png"
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - page_title_icon: Image that goes on the left side of the main title of this page.
 page_title = "Review and Activate"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-page_title_icon = "/app/images/activate_icon.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+page_title_icon = "../app/images/activate_icon.png"
 
 # ID of the templates
 # Change this variables according to your Google Workspace settings
-drive_folder_id = '' # example: "1MYB0Ybyo9XZERgIcjsdfeqO0SKqhrkvqMx"
-slides_template_id = '' # example: '16uQlLkCJ9YRiMU_IoONHsl-vY-uKeoasnWTPlbZZ1D4'
-doc_template_id = '' # example: '1kqvxZLRXIdfM8MVS7css4UoiJ8f0I4dKFj9cP986K4pM'
-sheet_template_id = '' # example: '1gIaIWLOeKmnjso7-CAAAcqMlPznpoEXDdEue3DNWr7bw'
+drive_folder_id = '15OJmSuDduDs_UYQJi1nPki1lce--lxxX' # example: "1MYB0Ybyo9XZERgIcjsdfeqO0SKqhrkvqMx"
+slides_template_id = '15OJmSuDduDs_UYQJi1nPki1lce--lxxX' # example: '16uQlLkCJ9YRiMU_IoONHsl-vY-uKeoasnWTPlbZZ1D4'
+doc_template_id = '1V8uiH-_VnwczxYRBy3ZdCXVmAXGQJudn' # example: '1kqvxZLRXIdfM8MVS7css4UoiJ8f0I4dKFj9cP986K4pM'
+sheet_template_id = '1H64_CrIPJBKOfNPaZwH-_SNOPlK_Meen' # example: '1gIaIWLOeKmnjso7-CAAAcqMlPznpoEXDdEue3DNWr7bw'
 slide_page_id_list = ["p3","p4","p5","p6","p7","p8"] # LIST OF PAGES WHERE YOU WANT TO INSERT CHARTS FROM THE SHEETS
 
 # Scope for the Workspace API - don't change
@@ -586,18 +648,19 @@ workspace_scopes = [
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - page_title_icon: Image that goes on the left side of the main title of this page.
 page_title = "Campaign Performance"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-page_title_icon = "/app/images/opt_icon.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+page_title_icon = "../app/images/opt_icon.png"
 
 # Infobot version
 # Change with the code snippet provided by your Infobot deployment
 # The code is similar to the one commented below
-infobot = """<script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+infobot = """<link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+<script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
 <df-messenger
-  project-id=""
-  agent-id=""
-  language-code="">
+  project-id="ctimoteo-genaimkt-generate"
+  agent-id="6deac02b-c4a5-45fe-9d0b-e2190a398f76"
+  language-code="en">
   <df-messenger-chat-bubble
    chat-title="infobot-ads-help">
   </df-messenger-chat-bubble>
@@ -616,7 +679,7 @@ infobot = """<script src="https://www.gstatic.com/dialogflow-console/fast/df-mes
 # https://<LOOKER INSTANCE URL>/embed/dashboards/<DASHBOARD NUMBER>?allow_login_screen=true
 # Include your Dashboards following this patter:
 # dashboards.<Name of your dashboard, no spaces> = '<link to your dashboard>'
-dashboards.Overview = ''
+dashboards.Overview = 'https://googledemo.looker.com/embed/dashboards/2131?allow_login_screen=true'
 
 # -----------------------------------------------------------------------------
 # Configurations for 14_Vertex_AI_APIs.py
@@ -629,9 +692,9 @@ dashboards.Overview = ''
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - file_name_*: Images for this page.
 page_title = "Vertex AI APIs"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-file_name = "/app/images/favicon.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+file_name = "../app/images/favicon.png"
 
 
 # -----------------------------------------------------------------------------
@@ -645,9 +708,9 @@ file_name = "/app/images/favicon.png"
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - page_title_icon: Image that goes on the left side of the main title of this page.
 page_title = "Text Generation with PaLM"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-page_title_icon = "/app/images/favicon.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+page_title_icon = "../app/images/favicon.png"
 
 
 # -----------------------------------------------------------------------------
@@ -661,9 +724,9 @@ page_title_icon = "/app/images/favicon.png"
 # - sidebar_image_path: Image that goes in the left-side menu.
 # - page_title_icon: Image that goes on the left side of the main title of this page.
 page_title = "Image Generation"
-page_icon = "/app/images/favicon.png"
-sidebar_image_path = "/app/images/menu_icon_2.png"
-page_title_icon = "/app/images/favicon.png"
+page_icon = "../app/images/favicon.png"
+sidebar_image_path = "../app/images/menu_icon_2.png"
+page_title_icon = "../app/images/favicon.png"
 
 # Pre populated prompts for image generation.
 # You can change this defaults as needed.

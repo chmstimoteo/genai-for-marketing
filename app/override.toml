@@ -18,7 +18,7 @@
 [global]
 
 # Replace with your project ID and location
-project_id = ""
+project_id = "ctimoteo-genaimkt-generate"
 location = "us-central1"
 service_account_json_key = ""
 
@@ -29,10 +29,10 @@ service_account_json_key = ""
 
 # Dataset ID of the BigQuery dataset. If you change the dataset_id during the deployment 
 # of this solution, change it here as well.
-dataset_id = ""
+dataset_id = "cdp_dataset"
 
 # Tag name for the Dataplex Tag manager.
-tag_name = ""
+tag_name = "llmcdptemplate"
 
 
 # -----------------------------------------------------------------------------
@@ -41,7 +41,7 @@ tag_name = ""
 [pages.campaigns]
 # This variable will be used to give permissions to all users under this domain
 # This permission is related to the Workspace Drive folder
-domain = "<YOUR DOMAIN>"
+domain = "google.com"
 
 
 # -----------------------------------------------------------------------------
@@ -51,7 +51,7 @@ domain = "<YOUR DOMAIN>"
 # Vertex AI Search datastores and location. 
 # Change the dataset variable to reflect your configuration.
 # Sample datastore ID
-datastores.example = 'default_config'
+datastores.google-ads-support_1701449807224 = 'default_config'
 search_location = "global"
 
 

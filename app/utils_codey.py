@@ -117,8 +117,7 @@ def get_metadata_from_dataset(
             The key to use to store the metadata in the Streamlit 
             session state.
     """
-    
-    if len(st.session_state.get(state_key, [])) == 0:
+    if len(st.session_state.get(state_key, [])) == 0 or True:
         # print("Gets the metadata once")
         bqclient = bigquery.Client(project=project_id)
         query_job = bqclient.query(query)  # API request
@@ -151,9 +150,22 @@ def get_full_context_from_list(metadata: list):
     return context
 
 
+def get_text_to_sql_examples(
+        text2sql_examples_template: str, 
+        project_id: str, 
+        dataset_id: str,
+        state_key: str):
+    
+    text2sql_examples = f"{text2sql_examples_template}".format(project_id=project_id, 
+                                                 dataset_id=dataset_id)
+
+    st.session_state[state_key] = text2sql_examples
+
+
 def generate_prompt(
         question: str,
         metadata: list,
+        examples: str,
         state_key: str,
 ):
     """Generates a prompt for a GoogleSQL query compatible with BigQuery.
@@ -180,6 +192,7 @@ def generate_prompt(
 
     st.session_state[state_key] = f"""{PROMPT.format(*PROMPT_PROJECT_ID)}
 {context}
+{examples}
 [Q]: {question}
 [SQL]: 
 """
@@ -226,7 +239,6 @@ def generate_sql_and_query(
         submit_button = st.form_submit_button("Submit")
     
     with placeholder_for_selectbox:
-
         question_option = st.selectbox(
             label=("Select one of the options to ask BigQuery tables "
                    "and find your audience"),
@@ -243,7 +255,7 @@ def generate_sql_and_query(
     if submit_button:
         question = ""
         reset_page_state(state_key)
-        if question_option == "Another question":
+        if question_option == "Another question...":
             if otherQuestion == "":
                 st.info("Please write your custom question...")
                 return None
@@ -258,11 +270,19 @@ def generate_sql_and_query(
                 dataset_id=dataset_id,
                 tag_template_name=tag_template_name,
                 state_key=f"{state_key}_Dataset_Metadata")
+        
+        with st.spinner('Retrieving the Text to GoogleSQL examples'):
+            get_text_to_sql_examples(
+                text2sql_examples_template=PAGES_CFG["3_audiences"]["text2sql_examples_template"], 
+                project_id=project_id, 
+                dataset_id=dataset_id,
+                state_key=f"{state_key}_TextToSQL_Examples")
 
         with st.spinner('Creating a prompt'):
             generate_prompt(
                 question, 
                 st.session_state[f"{state_key}_Dataset_Metadata"],
+                st.session_state[f"{state_key}_TextToSQL_Examples"],
                 f"{state_key}_Prompt_Template")
 
         with st.expander('Prompt'):

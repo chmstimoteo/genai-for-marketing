@@ -21,6 +21,7 @@ Audience and Insight finder:
 
 import streamlit as st
 import utils_codey
+import utils_language
 import vertexai
 
 from google.cloud import bigquery
@@ -114,11 +115,24 @@ if PREVIEW_TABLES_KEY in st.session_state:
         st.write(f'Preview for table: {result["name"]}')
         st.dataframe(result['dataframe'])
 
-st.subheader('Audience Insights Finder')
+st.subheader('Audience Insights')
 
 utils_codey.generate_sql_and_query(
     state_key=f"{PAGE_KEY_PREFIX}_insight",
     title="Ask your data",
+    query=QUERY,
+    project_id=PROJECT_ID,
+    dataset_id=DATASET_ID,
+    tag_template_name=TAG_TEMPLATE_NAME,
+    bqclient=bqclient,
+    default_query=page_cfg.get("audience_query_0", "")
+)
+
+st.subheader('Audience Segments Insights')
+
+utils_language.generate_llm_audience_segment_insights(
+    state_key=f"{PAGE_KEY_PREFIX}_segment_insight",
+    title="Ask PaLM API",
     query=QUERY,
     project_id=PROJECT_ID,
     dataset_id=DATASET_ID,
