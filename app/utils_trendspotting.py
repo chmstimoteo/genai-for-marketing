@@ -394,13 +394,12 @@ class GoogleTrends:
         self.pytrend.build_payload(kw_list=keyword, cat=0, timeframe=f'{min_trends_date} {max_trends_date}', geo='US', gprop='')
 
         search_query = ''
-        if st.session_state[state_key_url]:
-            try:
-                suggestions = self.pytrend.suggestions(interest_keyword)
-                query = list(filter(lambda suggestion: suggestion['title'] == 'Coat', suggestions))[0]
-                search_query = query['mid']
-            except (TooManyRequestsError, ResponseError):
-                pass
+        try:
+            suggestions = self.pytrend.suggestions(interest_keyword)
+            query = list(filter(lambda suggestion: suggestion['title'] == 'Coat', suggestions))[0]
+            search_query = query['mid']
+        except (TooManyRequestsError, ResponseError):
+            pass
 
         city = list(filter(lambda dma: dma['city'] == 'Austin' and dma['region'] == "TX", DMA_MAJOR_CITIES))[0]
         geo_dma = 'US-'+str(city['region'])+'-'+str(city['dma_code'])

@@ -151,6 +151,7 @@ def generate_llm_audience_segment_insights(
         placeholder_for_file_upload = st.empty()
         personas_expander = st.empty()
         placeholder_for_textarea = st.empty()
+        placeholder_for_personaselection = st.empty()
         submit_button = st.form_submit_button("Submit")
     
     with placeholder_for_file_upload:
@@ -166,6 +167,17 @@ def generate_llm_audience_segment_insights(
                    "and generate your audience segment insight"),
             value=f"Describe each persona by their gender, age range, interests and affinity, parental status and estimated household income.",
             key=f"{state_key}_question_prompt_text_area")
+    
+    def _set_selected_persona():
+        st.session_state[f"{state_key}_Selected_Persona"] = st.session_state[f"{state_key}_Selected_Persona_Option"]
+
+    with placeholder_for_personaselection:
+        if f"{state_key}_Personas_File" in st.session_state:
+            personas_option = st.selectbox(
+                label=("Select one of the Personas"
+                    "and continue your work. This persona will be selected as default."),
+                options=st.session_state[f"{state_key}_Personas_File"].iloc[:,0].unique().tolist(),
+                key=f"{state_key}_Selected_Persona_Option", on_change=_set_selected_persona)
 
     if submit_button:
         question = ""

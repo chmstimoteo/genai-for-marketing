@@ -104,7 +104,13 @@ with tab1:
         placeholder_for_selectbox_theme = st.empty()
         placeholder_for_custom_theme = st.empty()
 
-        st.write("**Creative brief inputs**")
+        st.write("**Campaign brief audience inputs**")
+
+        AUDIENCE_PAGE_KEY_PREFIX = "TalkToData"
+        audience_state_key=f"{AUDIENCE_PAGE_KEY_PREFIX}_segment_insight"
+        if f"{audience_state_key}_Selected_Persona" in st.session_state:
+            st.info("Selected Persona: {}".format(st.session_state[f"{audience_state_key}_Selected_Persona"]))
+
         cols = st.columns([1, 1])
 
         with cols[0]:
@@ -191,8 +197,9 @@ with tab1:
                             age_group=age_select_theme,
                             parental_status=parental_status_select_theme,
                             household_income=household_income_select_theme,
+                            persona_name=st.session_state[f"{audience_state_key}_Selected_Persona"],
                             brand_overview=BRAND_OVERVIEW),
-                        "Campaign Briefing",
+                        "Campaign Brief",
                         TEXT_MODEL_NAME),
                     async_predict_text_llm(
                         COMMS_CHANNEL_PROMPT_TEMPLATE.format(

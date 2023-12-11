@@ -180,7 +180,9 @@ def image_generation(
         parameters={
             'sampleCount':sample_count,
             'sampleImageSize':sample_image_size,
-            'aspectRatio':aspect_ratio
+            'aspectRatio':aspect_ratio,
+            'sampleImageStyle':'digital_art',
+            'includeRaiReason': True
         }
     )
 

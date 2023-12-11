@@ -48,9 +48,9 @@ Portuguese = "pt"
 
 # If needed, replace with a specific version of the model. Check the Vertex AI 
 # documentation for more information.
-text.text_model_name = "text-bison"
-image.image_model_name = "imagegeneration"
-code.code_model_name = "code-bison"
+text.text_model_name = "text-bison@002"
+image.image_model_name = "imagegeneration@002"
+code.code_model_name = "code-bison@002"
 
 
 # -----------------------------------------------------------------------------
@@ -127,9 +127,9 @@ Cymbal is not just a brand; it's an experience. Recognizing the rhythm of life a
 
 # Prompt template for the "Brand Statement"
 # Change the prompt if needed.
-prompt_brand_statement_template = """You are a Campaign Manager working on Google Ads and Google Ad Manager.
+prompt_brand_statement_template = """You are a Campaign Manager working on Google Ads.
 Create a brand statement for a Performance Max campaign with the objective to increase
-online sales as objective. The targeted audience must include segments with these demographics:
+online sales as objective. The targeted audience must include segments with these persona demographics:
 gender {gender}, age group {age_group}, parental status {parental_status}, household income {household_income}.
 Using the Cymbal brand information below as your context.
 {brand_overview}
@@ -137,19 +137,20 @@ Brand Statement:"""
 
 # Prompt template for the "Primary message"
 # Change the prompt if needed.
-prompt_primary_msg_template = """You are a Campaign Manager working on Google Ads and Google Ad Manager at Cymbal.
-Create a campaign briefing for a Performance Max campaign, named {campaign_name}, with the objective to increase
+prompt_primary_msg_template = """You are a Campaign Manager working on Google Ads at Cymbal.
+Create a campaign brief for a Performance Max campaign, named {campaign_name}, with the objective to increase
 online sales as objective. The only KPI used will be CTR, ignoring the others.
-The targeted audience must include segments with these demographics:
-gender {gender}, age group {age_group}, parental status {parental_status}, household income {household_income}.
+The targeted audience must include segments with the persona info and demographics.
+Persona: {persona_name}. Persona demographics: gender {gender}, age group {age_group}, parental status {parental_status}, household income {household_income}.
+The household income defined as: "Top 10%" is above $146,001; "11-20% is $131,001 to $146,000; "21-30%" is $111,001 to $131,000; "31-40%" is $96,001 to $111,000; "41-50%" is $64,001 to $96,000; "Lower 50%" is $0 to $64,000.
 Use the brand overview below to extract any information that you need. 
 {brand_overview}
-The campaign briefing must include the essential details provided in the following briefing guideline.
-Campaign Briefing Guideline:
-A comprehensive campaign briefing should include the following sections to provide Campaign Managers with all the necessary information to create effective Performance Max campaigns in Google Ads:
+The campaign brief must include the essential details provided in the following briefing guideline.
+Campaign Brief Template:
+A comprehensive campaign brief should include the following sections to provide Campaign Managers with all the necessary information to create effective Performance Max campaigns in Google Ads:
 1. Campaign Name: Provide a concise and memorable name for the campaign.
 2. Campaign Objectives: Clearly define the specific goals of the campaign.
-3. Target Audience: List the demographics.
+3. Target Audience: Provide a concise description of the persona demographics, use income is dollars and their interests.
 4. Campaign Duration: Suggest a duration for the Performance Max campaign.
 5. Messaging Strategy
 5.1 Campaign Tone: Determine the overall tone and voice of the campaign messaging.
@@ -159,7 +160,7 @@ A comprehensive campaign briefing should include the following sections to provi
 7.1 Ad Copy Guidelines: Provide guidelines for the style, tone, and length of ad copy.
 7.2 Visual Guidelines: Specify the desired visual style, including color palette, imagery, and branding elements.
 7.3 Call to Action: Clearly define the desired action for the target audience.
-Campaign Briefing:"""
+Campaign Brief:"""
 
 # Prompt template for "Communication Channel"
 # Change the prompt if needed.
@@ -167,14 +168,14 @@ prompt_comms_channel_template = """
 You are a Campaign Manager working on Google Ads and Google Ad Manager at Cymbal.
 Generate Marketing Channels Recommendations for a Performance Max campaign, named {campaign_name}, with the objective to increase
 online sales as objective. The only KPI used will be CTR, ignoring the others.
-The targeted audience must include segments with these demographics:
+The targeted audience must include segments with these persona demographics:
 gender {gender}, age group {age_group}, parental status {parental_status}, household income {household_income}.
 Use the brand overview below to extract any information that you need. 
 {brand_overview}
 
-Channel Guideline:
-1. Recommended Channels: Identify the most suitable advertising channels for reaching the target audience, such as Google Search, Display, Social Media, or Youtube.
-2. Budget Allocation: Allocate the campaign budget across the recommended channels.
+Channel Template:
+1. Suggested Channels: Identify the most suitable advertising channels for reaching the target audience, such as Google Search, Display, Social Media, or Youtube.
+2. Budget Allocation: Suggest a budget allocation across the recommended channels, based on the previous information and provide an explanation.
 
 Marketing Channels Recommendations:"""
 
@@ -182,7 +183,7 @@ Marketing Channels Recommendations:"""
 # Change to your brand name if needed.
 prompt_business_name = "Cymbal"
 
-# Parameters for the Creative Brief generation. These parameters will be displayed
+# Parameters for the Campaign Brief generation. These parameters will be displayed
 # as options for the users.
 # Change these parameters if needed.
 prompt_genders =[
@@ -251,7 +252,10 @@ page_title_image = "../app/images/marketing_analytics_icon.png"
 # https://<LOOKER INSTANCE URL>/embed/dashboards/<DASHBOARD NUMBER>?allow_login_screen=true
 # Include your Dashboards following this patter:
 # dashboards.<Name of your dashboard, no spaces> = '<link to your dashboard>'
-dashboards.Overview = 'https://googledemo.looker.com/embed/dashboards/2131?allow_login_screen=true'
+dashboards.Overview = 'https://googledemo.looker.com/embed/dashboards/2?State=&City=&Country=USA&Traffic+Source=&User+Gender=&Date=90+days&Location=&allow_login_screen=true'
+dashboards.Campaign_Performance = 'https://googledemo.looker.com/embed/dashboards/11?Attribution+Source=Last+Touch&allow_login_screen=true'
+dashboards.Compare_Campaigns = 'https://googledemo.looker.com/embed/dashboards/12?Campaign+Name=&allow_login_screen=true'
+dashboards.Customer_Segment = 'https://googledemo.looker.com/embed/dashboards/54?Customer+Segment=-EMPTY&Date+Range=90+day&allow_login_screen=true'
 
 
 # -----------------------------------------------------------------------------
@@ -278,8 +282,8 @@ tag_name = "llmcdptemplate"
 
 # Prompt used to generate SQL from questions using natural language.
 # You can change this prompt if needed. 
-prompt_nl_sql = """This is a task converting text into GoogleSQL statement. We will first given the dataset schema and then ask a question in text. You are asked to generate SQL statement.
-Convert text to SQL:"""
+prompt_nl_sql = """This is a task converting text into GoogleSQL / BigQuery query. We will first given the dataset schema and then ask a question in text. You are asked to generate SQL statement.
+Convert text to GoogleSQL / BigQuery:"""
 
 # The following are default questions
 prompt_examples = [
@@ -291,12 +295,13 @@ prompt_examples = [
 prompt_example_0 = "What are the customer emails ordered by the sum of transactions value by customers in New York City?"
 prompt_example_1 = "What is the city and state with the most quantity of customers transactions?"
 prompt_example_2 = "What are the top 50 customer emails ordered by loyalty score?"
-prompt_example_3 = "What are the products with higher transaction value?"
+prompt_example_3 = "What are the products most sold?"
 prompt_example_4 = "What are the top 10 cities and states of the customers who bought more Coat?"
 prompt_example_5 = "What are the top 10 cities and states of the customers who bought less Coat?"
+prompt_example_6 = "What are the top 50 customer emails ordered by loyalty score, filter by customers living in Texas?"
 
 # The following are default Text2SQL examples to guide the LLM API to generate better GoogleSQL code
-text2sql_examples_template = """Examples converting Text to GoogleSQL: 
+text2sql_examples_template = """Examples converting Text to GoogleSQL / BigQuery query: 
 [Q]: What is the city and state with the most customer transactions?
 [SQL]: SELECT c.city, c.state, SUM(t.transaction_qnt) as total_transactions
 FROM `{project_id}.{dataset_id}.customers` AS c

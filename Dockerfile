@@ -21,7 +21,7 @@ ENV PYTHONUNBUFFERED True
 # Install python packages
 RUN pip3 install google-cloud-datacatalog
 RUN pip3 install db-dtypes
-RUN pip3 install -U google-cloud-aiplatform 
+RUN pip3 install google-cloud-aiplatform==1.36.2
 RUN pip3 install pandas 
 RUN pip3 install google-api-python-client 
 RUN pip3 install python-dateutil 

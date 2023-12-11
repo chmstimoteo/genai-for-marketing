@@ -190,6 +190,8 @@ with cols_page[1]:
                               and f"{PAGE_KEY_PREFIX}_Trends_Search_Queries" in st.session_state
                               and f"{PAGE_KEY_PREFIX}_Trends_Search_URL" in st.session_state):
         with st.spinner("Querying..."):
+            st.session_state[f"{PAGE_KEY_PREFIX}_Trends_Search_Interest"] = pd.DataFrame(None)
+            st.session_state[f"{PAGE_KEY_PREFIX}_Trends_Search_Queries"] = pd.DataFrame(None)
             google_trends_tool = GoogleTrends(
                 project_id=PROJECT_ID, bq_client=bq_client)
             google_trends_tool.get_search_interests_queries(

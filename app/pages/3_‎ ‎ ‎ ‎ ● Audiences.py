@@ -140,3 +140,4 @@ utils_language.generate_llm_audience_segment_insights(
     bqclient=bqclient,
     default_query=page_cfg.get("audience_query_0", "")
 )
+
