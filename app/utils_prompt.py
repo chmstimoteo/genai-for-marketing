@@ -101,15 +101,11 @@ def render_marketing_prompt_design(
     """
     with st.form(key='{state_key}_form'):
         st.write(f"**{prompt_title}**")
-
         if (show_temperature or show_max_output_tokens or
             show_top_k or show_top_p):
             col1, col2 = st.columns([70,30])
-
             with col1:
-                custom_prompt = st.text_area(
-                    f"{prompt_label}",f"{prompt_example}", text_area_height)
-            
+                placeholder_prompt_text_area = st.empty()
             with col2:
                 st.write('**Model parameters**')
                 if show_temperature:
@@ -117,17 +113,46 @@ def render_marketing_prompt_design(
                                             temperature)
                 if show_max_output_tokens:
                     max_output_tokens = st.slider('Max output tokens', 1, 1024,
-                                                  max_output_tokens)
+                                                    max_output_tokens)
                 if show_top_k:
                     top_k = st.slider('TopK', 1, 40, top_k)
                 if show_top_p:
                     top_p = st.slider('TopP', 0.0, 1.0, top_p)
-
         else:
+            # Initialize and set default value
+            if f"{state_key}_custom_prompt_text_input_temp" in st.session_state:
+                # Copy from placeholder to widget key
+                st.session_state[f"{state_key}_custom_prompt_text_input"] = st.session_state[f"{state_key}_custom_prompt_text_input_temp"]
+
+            def _custom_prompt_keeper():
+                # Copy from widget key to placeholder
+                st.session_state[f"{state_key}_custom_prompt_text_input_temp"] = st.session_state[f"{state_key}_custom_prompt_text_input"]
+
             custom_prompt = st.text_area(
-                f"{prompt_label}",f"{prompt_example}", text_area_height)
+                label=f"{prompt_label}",
+                value=f"{prompt_example}", 
+                height=text_area_height,
+                key=f"{state_key}_custom_prompt_text_input",
+                on_change=_custom_prompt_keeper)
 
         submit_button = st.form_submit_button(label='Generate')
+
+    with placeholder_prompt_text_area:
+        # Initialize and set default value
+        if f"{state_key}_custom_prompt_text_input_temp" in st.session_state:
+            # Copy from placeholder to widget key
+            st.session_state[f"{state_key}_custom_prompt_text_input"] = st.session_state[f"{state_key}_custom_prompt_text_input_temp"]
+
+        def _custom_prompt_keeper():
+            # Copy from widget key to placeholder
+            st.session_state[f"{state_key}_custom_prompt_text_input_temp"] = st.session_state[f"{state_key}_custom_prompt_text_input"]
+
+        custom_prompt = st.text_area(
+            label=f"{prompt_label}",
+            value=f"{prompt_example}", 
+            height=text_area_height,
+            key=f"{state_key}_custom_prompt_text_input",
+            on_change=_custom_prompt_keeper)
 
     if submit_button:
         if not custom_prompt:

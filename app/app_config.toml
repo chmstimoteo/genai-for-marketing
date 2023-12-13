@@ -49,7 +49,7 @@ Portuguese = "pt"
 # If needed, replace with a specific version of the model. Check the Vertex AI 
 # documentation for more information.
 text.text_model_name = "text-bison@002"
-image.image_model_name = "imagegeneration@002"
+image.image_model_name = "imagegeneration@005"
 code.code_model_name = "code-bison@002"
 
 
@@ -253,8 +253,10 @@ page_title_image = "../app/images/marketing_analytics_icon.png"
 # Include your Dashboards following this patter:
 # dashboards.<Name of your dashboard, no spaces> = '<link to your dashboard>'
 dashboards.Overview = 'https://googledemo.looker.com/embed/dashboards/2?State=&City=&Country=USA&Traffic+Source=&User+Gender=&Date=90+days&Location=&allow_login_screen=true'
-dashboards.Campaign_Performance = 'https://googledemo.looker.com/embed/dashboards/11?Attribution+Source=Last+Touch&allow_login_screen=true'
-dashboards.Compare_Campaigns = 'https://googledemo.looker.com/embed/dashboards/12?Campaign+Name=&allow_login_screen=true'
+dashboards.Campaign_Performance = 'https://googledemo.looker.com/embed/dashboards/13?Date=90+days+ago+for+90+days&Location=&allow_login_screen=true'
+#dashboards.Campaign_Performance = 'https://googledemo.looker.com/embed/dashboards/11?Attribution+Source=Last+Touch&allow_login_screen=true'
+dashboards.Compare_Campaigns = 'https://googledemo.looker.com/embed/dashboards/11?Attribution+Source=Last+Touch&allow_login_screen=true'
+#dashboards.Compare_Campaigns = 'https://googledemo.looker.com/embed/dashboards/12?Campaign+Name=&allow_login_screen=true'
 dashboards.Customer_Segment = 'https://googledemo.looker.com/embed/dashboards/54?Customer+Segment=-EMPTY&Date+Range=90+day&allow_login_screen=true'
 
 
@@ -298,7 +300,7 @@ prompt_example_2 = "What are the top 50 customer emails ordered by loyalty score
 prompt_example_3 = "What are the products most sold?"
 prompt_example_4 = "What are the top 10 cities and states of the customers who bought more Coat?"
 prompt_example_5 = "What are the top 10 cities and states of the customers who bought less Coat?"
-prompt_example_6 = "What are the top 50 customer emails ordered by loyalty score, filter by customers living in Texas?"
+prompt_example_6 = "What are the customer email and city of customers living in Austin, Texas?"
 
 # The following are default Text2SQL examples to guide the LLM API to generate better GoogleSQL code
 text2sql_examples_template = """Examples converting Text to GoogleSQL / BigQuery query: 
@@ -396,6 +398,7 @@ page_title_image = "../app/images/consumer_icon.png"
 datastores.google-ads-support_1701449807224 = 'default_config'
 search_location = "global"
 
+prompt_example_consumer_insights = "What are the regulations to target ads to families with kids?"
 
 # -----------------------------------------------------------------------------
 # Configurations for 6_Content_Generation.py

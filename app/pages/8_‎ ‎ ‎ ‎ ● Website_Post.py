@@ -253,7 +253,7 @@ if (GENERATED_TEXT_KEY in st.session_state and
 
     if link_to_campaign_button:
         image = "data:image/png;base64,"+base64.b64encode(
-            st.session_state[SELECTED_IMAGE_KEY].getvalue()).decode("utf-8")
+            st.session_state[SELECTED_IMAGE_KEY]).decode("utf-8")
         selected_uuid = generate_names_uuid_dict()[selected_name]
         st.session_state[CAMPAIGNS_KEY][selected_uuid].website_post = {
             'website_text': st.session_state[GENERATED_TEXT_KEY]}

@@ -242,22 +242,47 @@ def generate_sql_and_query(
         submit_button = st.form_submit_button("Submit")
     
     with placeholder_for_selectbox:
+
+        # Initialize and set default value
+        if f"{state_key}_question_prompt_text_area_temp" in st.session_state:
+             # Copy from placeholder to widget key
+            st.session_state[f"{state_key}_question_prompt_text_area"] = st.session_state[f"{state_key}_question_prompt_text_area_temp"]
+
+        def _question_option_keeper():
+            # Copy from widget key to placeholder
+            st.session_state[f"{state_key}_question_prompt_text_area_temp"] = st.session_state[f"{state_key}_question_prompt_text_area"]
+
         question_option = st.selectbox(
             label=("Select one of the options to ask BigQuery tables "
                    "and find your audience"),
             options=PAGES_CFG["3_audiences"][
                 "prompt_examples"] + ["Another question..."],
-            key=f"{state_key}_question_prompt_text_area")
+            key=f"{state_key}_question_prompt_text_area",
+            on_change=_question_option_keeper)
 
     with placeholder_for_custom_question:
         if question_option == "Another question...":
-            otherQuestion = st.text_input("Enter your custom question")
+
+            # Initialize and set default value
+            if f"{state_key}_question_prompt_text_input_temp" in st.session_state:
+                # Copy from placeholder to widget key
+                st.session_state[f"{state_key}_question_prompt_text_input"] = st.session_state[f"{state_key}_question_prompt_text_input_temp"]
+
+            def _other_question_keeper():
+                # Copy from widget key to placeholder
+                st.session_state[f"{state_key}_question_prompt_text_input_temp"] = st.session_state[f"{state_key}_question_prompt_text_input"]
+
+            otherQuestion = st.text_input(
+                label="Enter your custom question",
+                value=None,
+                key=f"{state_key}_question_prompt_text_input",
+                on_change=_other_question_keeper)
         else:
             otherQuestion = ""
 
     if submit_button:
         question = ""
-        reset_page_state(state_key)
+        
         if question_option == "Another question...":
             if otherQuestion == "":
                 st.info("Please write your custom question...")
@@ -390,3 +415,11 @@ def generate_sql_and_query(
                     selected_uuid].audiences = st.session_state[
                         f"{state_key}_Result_Final_Query"]
                 st.success(f"Saved to campaign {selected_name}")
+            
+            #reset_page_state(state_key)
+    
+    if (f"{state_key}_Result_Final_Query" in st.session_state):
+        df = st.session_state[f"{state_key}_Result_Final_Query"]
+        if (CAMPAIGNS_KEY not in st.session_state and
+            "email" in df.columns):
+            st.info("Create a campaign to export these customers emails.")

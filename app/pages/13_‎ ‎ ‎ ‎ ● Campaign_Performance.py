@@ -23,7 +23,6 @@ Marketing Insights demonstration:
 
 import streamlit as st
 import streamlit.components.v1 as components
-
 from utils_config import GLOBAL_CFG, MODEL_CFG, PAGES_CFG
 
 
@@ -47,6 +46,7 @@ LOCATION = GLOBAL_CFG["location"]
 TEXT_MODEL_NAME = MODEL_CFG["text"]["text_model_name"]
 IMAGE_MODEL_NAME = MODEL_CFG["image"]["image_model_name"]
 
+# State variables for image and text generation
 DASHBOARDS = page_cfg["dashboards"]
 INFOBOT = page_cfg["infobot"]
 
@@ -58,7 +58,7 @@ cols = st.columns([15,70,15])
 with cols[1]:
     cols = st.columns([10, 90])
     with cols[0]:
-        st.image('/app/images/opt_icon.png')
+        st.image('../app/images/opt_icon.png')
     with cols[1]:
         st.title('Campaign Performance')
 
@@ -67,11 +67,24 @@ with cols[1]:
 
     if DASHBOARDS:
         with st.form(key='generate_marketing_dashboard'):
-            option = st.selectbox(
-                'Select a dashboard to be displayed',
-                [i.replace("_", " ") for i in DASHBOARDS.keys()])
-
+            placeholder_for_selectbox = st.empty()
             submit_button = st.form_submit_button(label='Generate Dashboard')
+        
+        with placeholder_for_selectbox:
+            # Initialize and set default value
+            if f"{DASHBOARD_KEY}_option_selectbox_temp" in st.session_state:
+                # Copy from placeholder to widget key
+                st.session_state[f"{DASHBOARD_KEY}_option_selectbox"] = st.session_state[f"{DASHBOARD_KEY}_option_selectbox_temp"]
+
+            def _option_keeper():
+                # Copy from widget key to placeholder
+                st.session_state[f"{DASHBOARD_KEY}_option_selectbox_temp"] = st.session_state[f"{DASHBOARD_KEY}_option_selectbox"]
+            
+            option = st.selectbox(
+                label = 'Select a dashboard to be displayed',
+                options = [i.replace("_", " ") for i in DASHBOARDS.keys()],
+                key=f"{DASHBOARD_KEY}_option_selectbox",
+                on_change=_option_keeper)
 
         if submit_button:
             st.session_state[DASHBOARD_KEY] = option.replace(" ", "_")
@@ -79,7 +92,14 @@ with cols[1]:
         st.info('Dashboards not available.')
 
 if DASHBOARD_KEY in st.session_state:
-    components.html(
-        f'<iframe src="{DASHBOARDS.get(st.session_state[DASHBOARD_KEY])}" '
-        f'frameborder="0" width="100%" height="800px"></iframe>{INFOBOT}', 
-        height=800)
+    components.iframe(
+        src=DASHBOARDS.get(st.session_state[DASHBOARD_KEY]), 
+        height=800, 
+        scrolling=False
+    )
+else:
+    components.iframe(
+        src=DASHBOARDS['Overview'],
+        height=800, 
+        scrolling=False
+    )

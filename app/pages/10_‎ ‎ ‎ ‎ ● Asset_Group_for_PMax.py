@@ -340,16 +340,22 @@ if (UUID_KEY in st.session_state and
                          selected_uuid].asset_classes_text = assets_text_pd
 
         assets_images_pd = pd.DataFrame()
-        if GENERATED_IMAGES_KEY in st.session_state:
-            for i, value in enumerate(st.session_state[GENERATED_IMAGES_KEY]):
-                assets_images_pd.insert(
-                    i,
-                    column=f'image_{i}',
-                    value=np.array(
-                        ["data:image/png;base64,"+value["bytesBase64Encoded"]])
-                )
-        else:
-            assets_images_pd.insert(
+        #if GENERATED_IMAGES_KEY in st.session_state:
+        #    for i, value in enumerate(st.session_state[GENERATED_IMAGES_KEY]):
+        #        assets_images_pd.insert(
+        #            i,
+        #            column=f'image_{i}',
+        #            value=np.array(
+        #                ["data:image/png;base64,"+value["bytesBase64Encoded"]])
+        #        )
+        #else:
+        #    assets_images_pd.insert(
+        #        0, 
+        #        column='image_0', 
+        #        value=np.array(["data:image/png;base64,"+base64.b64encode(
+        #            st.session_state[IMAGE_TO_EDIT_KEY]).decode('utf-8')]))
+
+        assets_images_pd.insert(
                 0, 
                 column='image_0', 
                 value=np.array(["data:image/png;base64,"+base64.b64encode(

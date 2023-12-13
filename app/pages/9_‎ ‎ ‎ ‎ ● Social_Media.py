@@ -193,7 +193,7 @@ def render_ad(
         st.write("**Selected image**")
         st.image(st.session_state[key_prefix+"_Selected_Image"])
         image = base64.b64encode(st.session_state[
-            key_prefix+"_Selected_Image"].getvalue()).decode("utf-8")
+            key_prefix+"_Selected_Image"]).decode("utf-8")
 
     if (key_prefix+"_Text" in st.session_state and 
         (key_prefix+"_Selected_Image" in st.session_state or
@@ -251,7 +251,7 @@ if UUID_KEY in st.session_state:
 
     st.subheader(f"Social Media Post for campaign '{campaign_name}'")
 
-    threads_tab, instagram_tab = st.tabs(["Threads", "Instagram"])
+    instagram_tab, threads_tab  = st.tabs(["Instagram", "Threads"])
     is_new_generation = False
     with threads_tab:
         with st.form("Generate Threads Ads"):
