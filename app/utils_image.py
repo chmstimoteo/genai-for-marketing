@@ -180,7 +180,9 @@ def image_generation(
         parameters={
             'sampleCount':sample_count,
             'sampleImageSize':sample_image_size,
-            'aspectRatio':aspect_ratio
+            'aspectRatio':aspect_ratio,
+            'sampleImageStyle':'digital_art',
+            'includeRaiReason': True
         }
     )
 
@@ -563,7 +565,10 @@ def render_image_edit_prompt(
                         bytes_data = resize_image_bytes(bytes_data)
                     
                     if not edit_image_prompt:
-                        st.error("Provide a prompt for editing the image")
+                        st.warning("Skipping changes to the uploaded image")
+                        st.session_state["skip_edited_images"] = True
+                        st.session_state[edited_images_key] = bytes_data
+
                     else:
                         st.session_state[
                             edit_image_prompt_key] = edit_image_prompt
@@ -580,7 +585,7 @@ def render_image_edit_prompt(
                     st.error("No image found to edit")
 
             
-    if edited_images_key in st.session_state:
+    if edited_images_key in st.session_state and not st.session_state["skip_edited_images"]:
         with st.expander("Edited Images",
                          expanded=selected_image_key not in st.session_state):
             generate_image_columns(
@@ -588,6 +593,8 @@ def render_image_edit_prompt(
                 select_button,
                 selected_image_key,
                 download_button=download_button)
+    elif edited_images_key in st.session_state:
+        st.session_state[selected_image_key]= st.session_state[edited_images_key]
 
 
 def render_image_generation_and_edition_ui(

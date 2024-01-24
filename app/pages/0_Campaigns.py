@@ -23,10 +23,13 @@ import streamlit.components.v1 as components
 import time
 import utils_workspace
 
+import traceback
+
 from PIL import Image, ImageOps
 from vertexai.preview.language_models import TextGenerationModel
 from utils_campaign import Campaign, add_new_campaign
 from utils_prompt import async_predict_text_llm
+from utils_streamlit import reset_page_state
 from utils_config import GLOBAL_CFG, MODEL_CFG, PAGES_CFG
 
 
@@ -74,8 +77,8 @@ COMMS_CHANNEL_PROMPT_TEMPLATE = page_cfg["prompt_comms_channel_template"]
 BUSINESS_NAME = page_cfg["prompt_business_name"]
 GENDER_FOR_PROMPTS = page_cfg["prompt_genders"]
 AGEGROUP_FOR_PROMPTS = page_cfg["prompt_age_groups"]
-OBJECTIVES_FOR_PROMPTS = page_cfg["prompt_objectives"]
-COMPETITORS_FOR_PROMPTS = page_cfg["prompt_competitors"]
+PARENTAL_STATUS_FOR_PROMPTS = page_cfg["prompt_parental_status"]
+HOUSEHOLD_INCOME_FOR_PROMPTS = page_cfg["prompt_household_income"]
 PROMPT_THEMES = page_cfg["prompt_themes"]
 
 # Variables for Workspace integration
@@ -97,47 +100,149 @@ tab1, tab2 = st.tabs(["Create Campaign", "Existing Campaigns"])
 with tab1:
     with st.form(CAMPAIGNS_KEY+"_Creation_Form"):
         st.write("**Create a new campaign**")
-        campaign_name = st.text_input("Campaign name")
-
+        placeholder_for_campaign_name_input = st.empty()
         placeholder_for_selectbox_theme = st.empty()
         placeholder_for_custom_theme = st.empty()
-
-        st.write("**Creative brief inputs**")
-        cols = st.columns([1, 1])
-
-        with cols[0]:
-            gender_select_theme = st.selectbox(
-            'Select the targeted gender:',
-            options=GENDER_FOR_PROMPTS)
-        with cols[1]:
-            age_select_theme = st.selectbox(
-            'Select the targeted age group:',
-            options=AGEGROUP_FOR_PROMPTS)
-        
-        col1, col2 = st.columns([1,1])
+        st.write("**Campaign brief audience inputs**")
+        placeholder_for_campaign_brief_input = st.empty()
+        col1, col2 = st.columns([1, 1])
         with col1:
-            objective_select_theme = st.selectbox(
-                'Select the objective:',
-                options=OBJECTIVES_FOR_PROMPTS)
-
+            placeholder_for_campaign_brief_input_col1_row1 = st.empty()
+            placeholder_for_campaign_brief_input_col1_row2 = st.empty()
         with col2:
-            competitor_select_theme = st.selectbox(
-                'Select the chief competitor:',
-                options=COMPETITORS_FOR_PROMPTS)
-
+            placeholder_for_campaign_brief_input_col2_row1 = st.empty()
+            placeholder_for_campaign_brief_input_col2_row2 = st.empty()
         create_campaign_button = st.form_submit_button()
+
+    # Create campaign name
+    with placeholder_for_campaign_name_input:
+        # Initialize and set default value
+        if f"{PAGE_KEY_PREFIX}_campaign_name_text_input_temp" in st.session_state:
+            # Copy from placeholder to widget key
+            st.session_state[f"{PAGE_KEY_PREFIX}_campaign_name_text_input"] = st.session_state[f"{PAGE_KEY_PREFIX}_campaign_name_text_input_temp"]
+
+        def _campaign_name_keeper():
+            # Copy from widget key to placeholder
+            st.session_state[f"{PAGE_KEY_PREFIX}_campaign_name_text_input_temp"] = st.session_state[f"{PAGE_KEY_PREFIX}_campaign_name_text_input"]
+
+        campaign_name = st.text_input(
+            label="Campaign name",
+            value=None,
+            key=f"{PAGE_KEY_PREFIX}_campaign_name_text_input",
+            on_change=_campaign_name_keeper)
+
     # Create selectbox
     with placeholder_for_selectbox_theme:
-        options = PROMPT_THEMES + ["Another theme..."]
-        selection = st.selectbox("Select a theme", options=options)
+        # Initialize and set default value
+        if f"{PAGE_KEY_PREFIX}_campaign_theme_selectbox_temp" in st.session_state:
+             # Copy from placeholder to widget key
+            st.session_state[f"{PAGE_KEY_PREFIX}_campaign_theme_selectbox"] = st.session_state[f"{PAGE_KEY_PREFIX}_campaign_theme_selectbox_temp"]
+
+        def _theme_selection_keeper():
+            # Copy from widget key to placeholder
+            st.session_state[f"{PAGE_KEY_PREFIX}_campaign_theme_selectbox_temp"] = st.session_state[f"{PAGE_KEY_PREFIX}_campaign_theme_selectbox"]
+
+        selection = st.selectbox(
+            label="Select a theme", 
+            options=PROMPT_THEMES + ["Another theme..."],
+            key=f"{PAGE_KEY_PREFIX}_campaign_theme_selectbox",
+            on_change=_theme_selection_keeper)
 
     # Create text input for user entry
     with placeholder_for_custom_theme:
         if selection == "Another theme...":
-            other_option = st.text_input("Enter your custom theme...")
+            # Initialize and set default value
+            if f"{PAGE_KEY_PREFIX}_custom_theme_text_input_temp" in st.session_state:
+                # Copy from placeholder to widget key
+                st.session_state[f"{PAGE_KEY_PREFIX}_custom_theme_text_input"] = st.session_state[f"{PAGE_KEY_PREFIX}_custom_theme_text_input_temp"]
+
+            def _other_option_keeper():
+                # Copy from widget key to placeholder
+                st.session_state[f"{PAGE_KEY_PREFIX}_custom_theme_text_input_temp"] = st.session_state[f"{PAGE_KEY_PREFIX}_custom_theme_text_input"]
+
+            other_option = st.text_input(
+                label="Enter your custom theme...",
+                value=None,
+                key=f"{PAGE_KEY_PREFIX}_custom_theme_text_input",
+                on_change=_other_option_keeper)
         else:
             other_option = ""
 
+    # Create Campaign Brief inputs
+    with placeholder_for_campaign_brief_input:
+        AUDIENCE_PAGE_KEY_PREFIX = "TalkToData"
+        audience_state_key=f"{AUDIENCE_PAGE_KEY_PREFIX}_segment_insight"
+        if f"{audience_state_key}_Selected_Persona" in st.session_state:
+            st.session_state[f"{PAGE_KEY_PREFIX}_Selected_Persona"] = st.session_state[f"{audience_state_key}_Selected_Persona"]
+            st.info("Selected Persona: {}".format(st.session_state[f"{PAGE_KEY_PREFIX}_Selected_Persona"]))
+        else:
+            st.session_state[f"{PAGE_KEY_PREFIX}_Selected_Persona"] = "Unkown"
+
+    with placeholder_for_campaign_brief_input_col1_row1:
+        # Initialize and set default value
+        if f"{PAGE_KEY_PREFIX}_gender_select_theme_selectbox_temp" in st.session_state:
+            # Copy from placeholder to widget key
+            st.session_state[f"{PAGE_KEY_PREFIX}_gender_select_theme_selectbox"] = st.session_state[f"{PAGE_KEY_PREFIX}_gender_select_theme_selectbox_temp"]
+
+        def _gender_select_theme_keeper():
+            # Copy from widget key to placeholder
+            st.session_state[f"{PAGE_KEY_PREFIX}_gender_select_theme_selectbox_temp"] = st.session_state[f"{PAGE_KEY_PREFIX}_gender_select_theme_selectbox"]
+
+        gender_select_theme = st.selectbox(
+            label='Select the targeted gender:',
+            options=GENDER_FOR_PROMPTS,
+            key=f"{PAGE_KEY_PREFIX}_gender_select_theme_selectbox",
+            on_change=_gender_select_theme_keeper)
+        
+    with placeholder_for_campaign_brief_input_col1_row2:
+        # Initialize and set default value
+        if f"{PAGE_KEY_PREFIX}_parental_status_select_theme_selectbox_temp" in st.session_state:
+            # Copy from placeholder to widget key
+            st.session_state[f"{PAGE_KEY_PREFIX}_parental_status_select_theme_selectbox"] = st.session_state[f"{PAGE_KEY_PREFIX}_parental_status_select_theme_selectbox_temp"]
+
+        def _parental_status_select_theme_keeper():
+            # Copy from widget key to placeholder
+            st.session_state[f"{PAGE_KEY_PREFIX}_parental_status_select_theme_selectbox_temp"] = st.session_state[f"{PAGE_KEY_PREFIX}_parental_status_select_theme_selectbox"]
+
+        parental_status_select_theme = st.selectbox(
+            label='Select the parental status:',
+            options=PARENTAL_STATUS_FOR_PROMPTS,
+            key=f"{PAGE_KEY_PREFIX}_parental_status_select_theme_selectbox",
+            on_change=_parental_status_select_theme_keeper)
+        
+    with placeholder_for_campaign_brief_input_col2_row1:
+        # Initialize and set default value
+        if f"{PAGE_KEY_PREFIX}_age_select_theme_selectbox_temp" in st.session_state:
+            # Copy from placeholder to widget key
+            st.session_state[f"{PAGE_KEY_PREFIX}_age_select_theme_selectbox"] = st.session_state[f"{PAGE_KEY_PREFIX}_age_select_theme_selectbox_temp"]
+
+        def _age_select_theme_keeper():
+            # Copy from widget key to placeholder
+            st.session_state[f"{PAGE_KEY_PREFIX}_age_select_theme_selectbox_temp"] = st.session_state[f"{PAGE_KEY_PREFIX}_age_select_theme_selectbox"]
+
+        age_select_theme = st.selectbox(
+            label='Select the targeted age group:',
+            options=AGEGROUP_FOR_PROMPTS,
+            key=f"{PAGE_KEY_PREFIX}_age_select_theme_selectbox",
+            on_change=_age_select_theme_keeper)
+
+    with placeholder_for_campaign_brief_input_col2_row2:
+        # Initialize and set default value
+        if f"{PAGE_KEY_PREFIX}_household_income_select_theme_selectbox_temp" in st.session_state:
+             # Copy from placeholder to widget key
+            st.session_state[f"{PAGE_KEY_PREFIX}_household_income_select_theme_selectbox"] = st.session_state[f"{PAGE_KEY_PREFIX}_household_income_select_theme_selectbox_temp"]
+
+        def _household_income_select_theme_keeper():
+            # Copy from widget key to placeholder
+            st.session_state[f"{PAGE_KEY_PREFIX}_household_income_select_theme_selectbox_temp"] = st.session_state[f"{PAGE_KEY_PREFIX}_household_income_select_theme_selectbox"]
+
+        household_income_select_theme = st.selectbox(
+            label='Select the Household income:',
+            options=HOUSEHOLD_INCOME_FOR_PROMPTS,
+            key=f"{PAGE_KEY_PREFIX}_household_income_select_theme_selectbox",
+            on_change=_household_income_select_theme_keeper)
+
+    # When submit button is clicked
     campaign_uuid = None
     if create_campaign_button:
         theme = ""
@@ -170,34 +275,40 @@ with tab1:
             is_allowed_to_create_campaign = True
 
         if is_allowed_to_create_campaign and theme != "":
+            
             async def generate_campaign() -> tuple:
                 return await asyncio.gather(
                     async_predict_text_llm(
                         BRAND_STATEMENT_PROMPT_TEMPLATE.format(
-                            gender_select_theme, 
-                            age_select_theme,
-                            objective_select_theme,
-                            competitor_select_theme,
-                            BRAND_OVERVIEW),
+                            gender=gender_select_theme, 
+                            age_group=age_select_theme,
+                            parental_status=parental_status_select_theme,
+                            household_income=household_income_select_theme,
+                            brand_overview=BRAND_OVERVIEW),
                         "Brand Statement",
                         TEXT_MODEL_NAME),
                     async_predict_text_llm(
                         PRIMARY_MSG_PROMPT_TEMPLATE.format(
-                            gender_select_theme, 
-                            age_select_theme,
-                            objective_select_theme,
-                            competitor_select_theme,
-                            BRAND_OVERVIEW),
-                        "Brand Strategy",
+                            campaign_name=campaign_name,
+                            gender=gender_select_theme, 
+                            age_group=age_select_theme,
+                            parental_status=parental_status_select_theme,
+                            household_income=household_income_select_theme,
+                            persona_name=st.session_state[f"{PAGE_KEY_PREFIX}_Selected_Persona"],
+                            brand_overview=BRAND_OVERVIEW),
+                        "Campaign Brief",
                         TEXT_MODEL_NAME),
                     async_predict_text_llm(
                         COMMS_CHANNEL_PROMPT_TEMPLATE.format(
-                            gender_select_theme, 
-                            age_select_theme,
-                            objective_select_theme,
-                            competitor_select_theme),
-                        "Communication channels",
-                        TEXT_MODEL_NAME)) 
+                            campaign_name=campaign_name,
+                            gender=gender_select_theme, 
+                            age_group=age_select_theme,
+                            parental_status=parental_status_select_theme,
+                            household_income=household_income_select_theme,
+                            brand_overview=BRAND_OVERVIEW),
+                        "Marketing Channels Recommendations",
+                        TEXT_MODEL_NAME)
+                ) 
             try:
                 generated_tuple = asyncio.run(generate_campaign())
                 st.session_state[BRAND_STATEMENT_KEY] = generated_tuple[0] 
@@ -206,8 +317,8 @@ with tab1:
                 st.session_state[THEMES_FOR_PROMPTS_KEY] = (
                     f'Targeting gender: {gender_select_theme}, '
                     f'Age group: {age_select_theme}, '
-                    f'Campaign objective: {objective_select_theme}, '
-                    f'Competitor: {competitor_select_theme}')
+                    f'Parental status: {parental_status_select_theme}, '
+                    f'Household income: {household_income_select_theme}')
             except:
                 st.info('Something went wrong with your prompt. Try again.')
             else:
@@ -249,9 +360,12 @@ with tab1:
                         scenario=clean(brief["brief_scenario"]), 
                         brand_statement=clean(brief["brand_statement"]),
                         primary_msg=clean(brief["primary_message"]), 
-                        comms_channel=clean(brief["comm_channels"]))
+                        comms_channel=clean(brief["comm_channels"])
+                        )
             except:
-                del st.session_state[CAMPAIGNS_KEY][campaign_uuid]
+                if "CAMPAIGNS_KEY" in st.session_state:
+                    del st.session_state[CAMPAIGNS_KEY][campaign_uuid]
+                st.write(traceback.format_exc())
                 st.info("Campaign could not be created. Please try again.")
             else:
                 st.success(f"Campaign '{campaign_name}' generated "
@@ -270,6 +384,8 @@ with tab1:
                         src=f'https://docs.google.com/file/d/{doc_id}/preview',
                         height=1000
                     )
+                reset_page_state(PAGE_KEY_PREFIX)
+
 
 
 def display_campaigns_upload(

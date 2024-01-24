@@ -76,8 +76,9 @@ From [Cloud Shell](https://cloud.google.com/shell/docs/using-cloud-shell), run t
 Change `PROJECT_ID` to the id of your project.
 
 ```bash
-export PROJECT_ID=<CHANGE TO YOUR PROJECT ID>
- 
+export PROJECT_ID=ctimoteo-genaimkt-generate
+export CLOUDSDK_PYTHON=python3 
+
 gcloud config set project $PROJECT_ID
  
 gcloud services enable \
@@ -90,7 +91,7 @@ gcloud services enable \
   cloudapis.googleapis.com \
   cloudtrace.googleapis.com \
   containerregistry.googleapis.com \
-  iamcredentials.googleapis.com
+  iamcredentials.googleapis.com 
 
 gcloud services enable \
   monitoring.googleapis.com \
@@ -106,6 +107,19 @@ gcloud services enable \
   drive.googleapis.com \
   sheets.googleapis.com \
   slides.googleapis.com
+
+gcloud services enable \
+  datacatalog.googleapis.com \
+  dialogflow.googleapis.com \
+  iam.googleapis.com \
+  drive.googleapis.com \
+  docs.googleapis.com
+
+gcloud auth application-default set-quota-project $PROJECT_ID
+export OAUTHLIB_RELAX_TOKEN_SCOPE=1
+gcloud auth application-default login \
+  --quiet \
+  --scopes="openid,https://www.googleapis.com/auth/userinfo.email,https://www.googleapis.com/auth/userinfo.profile,https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/accounts.reauth,https://www.googleapis.com/auth/presentations,https://www.googleapis.com/auth/spreadsheets,https://www.googleapis.com/auth/drive.file,https://www.googleapis.com/auth/drive,https://www.googleapis.com/auth/drive.resource,https://www.googleapis.com/auth/documents"
 ```
 
 **Note**: When you work with Vertex AI user-managed notebooks, be sure that all the services that you're using are enabled.

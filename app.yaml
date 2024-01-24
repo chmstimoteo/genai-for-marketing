@@ -16,7 +16,7 @@
 runtime: custom
 env: flex
 
-service_account: <REPLACE WITH YOUR SERVICE ACCOUNT ADDRESS>
+service_account: sa-app-engine@ctimoteo-genaimkt-generate.iam.gserviceaccount.com
 
 resources:
   cpu: 4

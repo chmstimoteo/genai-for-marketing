@@ -27,10 +27,12 @@ from typing import Optional
 from utils_campaign import generate_names_uuid_dict
 from utils_config import GLOBAL_CFG, MODEL_CFG, PAGES_CFG
 from utils_streamlit import reset_page_state
-from vertexai.preview.language_models import TextGenerationModel
+from vertexai.preview.language_models import _PreviewTextGenerationModel
+from vertexai.language_models import CodeGenerationModel
 
 
 TEXT_MODEL_NAME = MODEL_CFG["text"]["text_model_name"]
+CODE_MODEL_NAME = MODEL_CFG["code"]["code_model_name"]
 
 PROMPT = PAGES_CFG["3_audiences"]["prompt_nl_sql"]
 PROMPT_PROJECT_ID = [GLOBAL_CFG['project_id']]*130
@@ -117,8 +119,7 @@ def get_metadata_from_dataset(
             The key to use to store the metadata in the Streamlit 
             session state.
     """
-    
-    if len(st.session_state.get(state_key, [])) == 0:
+    if len(st.session_state.get(state_key, [])) == 0 or True:
         # print("Gets the metadata once")
         bqclient = bigquery.Client(project=project_id)
         query_job = bqclient.query(query)  # API request
@@ -151,9 +152,22 @@ def get_full_context_from_list(metadata: list):
     return context
 
 
+def get_text_to_sql_examples(
+        text2sql_examples_template: str, 
+        project_id: str, 
+        dataset_id: str,
+        state_key: str):
+    
+    text2sql_examples = f"{text2sql_examples_template}".format(project_id=project_id, 
+                                                 dataset_id=dataset_id)
+
+    st.session_state[state_key] = text2sql_examples
+
+
 def generate_prompt(
         question: str,
         metadata: list,
+        examples: str,
         state_key: str,
 ):
     """Generates a prompt for a GoogleSQL query compatible with BigQuery.
@@ -180,6 +194,8 @@ def generate_prompt(
 
     st.session_state[state_key] = f"""{PROMPT.format(*PROMPT_PROJECT_ID)}
 {context}
+{examples}
+Format your answer as executable query. Don't use markdowns.
 [Q]: {question}
 [SQL]: 
 """
@@ -227,23 +243,47 @@ def generate_sql_and_query(
     
     with placeholder_for_selectbox:
 
+        # Initialize and set default value
+        if f"{state_key}_question_prompt_text_area_temp" in st.session_state:
+             # Copy from placeholder to widget key
+            st.session_state[f"{state_key}_question_prompt_text_area"] = st.session_state[f"{state_key}_question_prompt_text_area_temp"]
+
+        def _question_option_keeper():
+            # Copy from widget key to placeholder
+            st.session_state[f"{state_key}_question_prompt_text_area_temp"] = st.session_state[f"{state_key}_question_prompt_text_area"]
+
         question_option = st.selectbox(
             label=("Select one of the options to ask BigQuery tables "
                    "and find your audience"),
             options=PAGES_CFG["3_audiences"][
                 "prompt_examples"] + ["Another question..."],
-            key=f"{state_key}_question_prompt_text_area")
+            key=f"{state_key}_question_prompt_text_area",
+            on_change=_question_option_keeper)
 
     with placeholder_for_custom_question:
         if question_option == "Another question...":
-            otherQuestion = st.text_input("Enter your custom question")
+
+            # Initialize and set default value
+            if f"{state_key}_question_prompt_text_input_temp" in st.session_state:
+                # Copy from placeholder to widget key
+                st.session_state[f"{state_key}_question_prompt_text_input"] = st.session_state[f"{state_key}_question_prompt_text_input_temp"]
+
+            def _other_question_keeper():
+                # Copy from widget key to placeholder
+                st.session_state[f"{state_key}_question_prompt_text_input_temp"] = st.session_state[f"{state_key}_question_prompt_text_input"]
+
+            otherQuestion = st.text_input(
+                label="Enter your custom question",
+                value=None,
+                key=f"{state_key}_question_prompt_text_input",
+                on_change=_other_question_keeper)
         else:
             otherQuestion = ""
 
     if submit_button:
         question = ""
-        reset_page_state(state_key)
-        if question_option == "Another question":
+        
+        if question_option == "Another question...":
             if otherQuestion == "":
                 st.info("Please write your custom question...")
                 return None
@@ -258,22 +298,30 @@ def generate_sql_and_query(
                 dataset_id=dataset_id,
                 tag_template_name=tag_template_name,
                 state_key=f"{state_key}_Dataset_Metadata")
+        
+        with st.spinner('Retrieving the Text to GoogleSQL examples'):
+            get_text_to_sql_examples(
+                text2sql_examples_template=PAGES_CFG["3_audiences"]["text2sql_examples_template"], 
+                project_id=project_id, 
+                dataset_id=dataset_id,
+                state_key=f"{state_key}_TextToSQL_Examples")
 
         with st.spinner('Creating a prompt'):
             generate_prompt(
                 question, 
                 st.session_state[f"{state_key}_Dataset_Metadata"],
+                st.session_state[f"{state_key}_TextToSQL_Examples"],
                 f"{state_key}_Prompt_Template")
 
         with st.expander('Prompt'):
             st.text(st.session_state[f"{state_key}_Prompt_Template"])
         
         with st.spinner('Generating the GoogleSQL statement with PaLM'):
-            client_code_model = TextGenerationModel.from_pretrained(
-                TEXT_MODEL_NAME)
+            client_code_model = CodeGenerationModel.from_pretrained(
+                CODE_MODEL_NAME)
             try:
                 gen_code = client_code_model.predict(
-                    prompt = st.session_state[f"{state_key}_Prompt_Template"],
+                    prefix = st.session_state[f"{state_key}_Prompt_Template"],
                     max_output_tokens = 1024,
                     temperature=0.2
                 ).text
@@ -281,7 +329,6 @@ def generate_sql_and_query(
                 print("Error")
                 print(str(e))
                 gen_code = ""
-
 
             if gen_code:
                 st.session_state[f"{state_key}_Gen_Code"] = gen_code
@@ -316,8 +363,7 @@ def generate_sql_and_query(
                     ] = result_query.to_dataframe()
     
             st.write('Resulting query generated by PaLM 2')
-            st.write(f"""```sql
-                    {st.session_state[f"{state_key}_Gen_Code"]}""")
+            st.write(f"""{st.session_state[f"{state_key}_Gen_Code"]}""")
             st.success('Query executed successfully. Retrieving dataset.')
             st.write('')
             st.write('Resulting table (limited by 50 rows)')
@@ -325,8 +371,7 @@ def generate_sql_and_query(
                 st.session_state[f"{state_key}_Result_Final_Query"].iloc[:50])
         else:
             st.write('Resulting query generated by PaLM 2')
-            st.write(f"""```sql
-                    {st.session_state[f"{state_key}_Gen_Code"]}""")
+            st.write(f"""{st.session_state[f"{state_key}_Gen_Code"]}""")
             st.success('Query executed successfully. Retrieving dataset.')
             st.session_state[
                 f"{state_key}_Result_Final_Query"
@@ -370,3 +415,11 @@ def generate_sql_and_query(
                     selected_uuid].audiences = st.session_state[
                         f"{state_key}_Result_Final_Query"]
                 st.success(f"Saved to campaign {selected_name}")
+            
+            #reset_page_state(state_key)
+    
+    if (f"{state_key}_Result_Final_Query" in st.session_state):
+        df = st.session_state[f"{state_key}_Result_Final_Query"]
+        if (CAMPAIGNS_KEY not in st.session_state and
+            "email" in df.columns):
+            st.info("Create a campaign to export these customers emails.")

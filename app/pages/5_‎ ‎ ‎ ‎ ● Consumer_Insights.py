@@ -67,9 +67,24 @@ datastore = None
 if DATASTORES:
     with st.form(key=f"{PAGE_KEY_PREFIX}_form"):
         datastore = list(DATASTORES.keys())[0]
-
-        text = st.text_input("**Query**", key=f"{PAGE_KEY_PREFIX}_text_input")
+        placeholder_for_query_input = st.empty()
         search_button = st.form_submit_button("Search")
+    
+    with placeholder_for_query_input:
+        # Initialize and set default value
+        if f"{PAGE_KEY_PREFIX}_text_input_temp" in st.session_state:
+            # Copy from placeholder to widget key
+            st.session_state[f"{PAGE_KEY_PREFIX}_text_input"] = st.session_state[f"{PAGE_KEY_PREFIX}_text_input_temp"]
+
+        def _query_input_keeper():
+            # Copy from widget key to placeholder
+            st.session_state[f"{PAGE_KEY_PREFIX}_text_input_temp"] = st.session_state[f"{PAGE_KEY_PREFIX}_text_input"]
+
+        text = st.text_input(
+            label="**Query**", 
+            value=None,
+            key=f"{PAGE_KEY_PREFIX}_text_input",
+            on_change=_query_input_keeper)
 
     if search_button and text != st.session_state.get(QUERY_KEY):
         st.session_state[QUERY_KEY] = text

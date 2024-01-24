@@ -114,8 +114,8 @@ def generate_information(df: pd.DataFrame) -> pd.DataFrame:
         AGE_BUCKET, len(df['email']))
     df['gender'] = df['first_name'].map(
         lambda x: 'woman' if x in FEMALE_NAMES else 'man')
-    df['city'] = np.full_like(
-        df['email'], 'New York City') 
+    #df['city'] = np.full_like(
+    #    df['email'], 'New York City') 
     st.session_state[AUDIENCE_DATAFRAME_KEY] = df
     return df
 
@@ -237,9 +237,9 @@ if CAMPAIGNS_KEY in st.session_state:
             campaigns_names)
         def choose_campaign():
             selected_uuid = generate_names_uuid_dict()[selected_campaign]
-            if (UUID_KEY in st.session_state and 
-                st.session_state[UUID_KEY] != selected_uuid):
-                reset_page_state(PAGE_KEY_PREFIX)
+            #if (UUID_KEY in st.session_state and 
+            #    st.session_state[UUID_KEY] != selected_uuid):
+            #    reset_page_state(PAGE_KEY_PREFIX)
             st.session_state[UUID_KEY] = selected_uuid
             
         st.button("Retrieve audiences from campaign", on_click=choose_campaign)
@@ -267,9 +267,9 @@ if UUID_KEY in st.session_state:
 
             st.session_state[AUDIENCE_DATAFRAME_KEY] = audience_dataframe
     else:                  
-        st.info("To use this page, please generate "
-                f"the audience for campaign '{campaign_name}' "
-                "using the Audience page. ")
+        st.info("To use this page, please append customers emails "
+                f"to the campaign '{campaign_name}' "
+                "in the 'Audiences' page.")
 
 if AUDIENCE_DATAFRAME_KEY in st.session_state:
     selected_uuid = st.session_state[UUID_KEY]
@@ -351,7 +351,7 @@ if AUDIENCE_DATAFRAME_KEY in st.session_state:
             if images:
                 images = [
                     "data:image/png;base64," +
-                    base64.b64encode(image.getvalue()).decode('utf-8')
+                    base64.b64encode(image).decode('utf-8')
                     for image in images]
             st.session_state[IMAGES_KEY] = images
 
